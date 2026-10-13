@@ -29,13 +29,12 @@ SYMBOLS = [
     'DOGE/USDT:USDT'
 ]
 
-# Setup Bybit Futures
-bybit = ccxt.bybit({
+# Setup OKX Futures (Cloud-friendly exchange)
+exchange = ccxt.okx({
     'timeout': 30000,
     'enableRateLimit': True,
     'options': {
         'defaultType': 'swap',
-        'fetchMarkets': ['linear'],
     }
 })
 
@@ -59,7 +58,7 @@ def send_telegram_message(message):
 def analyze_timeframe(symbol, timeframe, limit=100, retries=3):
     for i in range(retries):
         try:
-            ohlcv = bybit.fetch_ohlcv(symbol, timeframe, limit=limit)
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
             
