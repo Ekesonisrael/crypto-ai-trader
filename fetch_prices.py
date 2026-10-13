@@ -19,22 +19,22 @@ ACCOUNT_BALANCE = 10000
 RISK_PERCENT = 0.01
 JOURNAL_FILE = 'trade_journal.csv'
 
-# THE 6 ASSETS TO SCAN (Binance Futures Symbols)
+# THE 6 ASSETS TO SCAN
 SYMBOLS = [
-    'BTC/USDT',
-    'ETH/USDT',
-    'SOL/USDT',
-    'BNB/USDT',
-    'XRP/USDT',
-    'DOGE/USDT'
+    'BTC/USDT:USDT',
+    'ETH/USDT:USDT',
+    'SOL/USDT:USDT',
+    'BNB/USDT:USDT',
+    'XRP/USDT:USDT',
+    'DOGE/USDT:USDT'
 ]
 
-# Setup Binance Futures
-exchange = ccxt.binance({
+# Setup OKX Futures (Cloud-friendly exchange)
+exchange = ccxt.okx({
     'timeout': 30000,
     'enableRateLimit': True,
     'options': {
-        'defaultType': 'future',
+        'defaultType': 'swap',
     }
 })
 
@@ -87,6 +87,7 @@ def analyze_timeframe(symbol, timeframe, limit=100, retries=3):
 print(f"Chief Agent: Scanning 6 Assets...")
 print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
+# Dictionary to track the last signal time for EACH coin (cooldown)
 last_signal_times = {symbol: None for symbol in SYMBOLS}
 
 for symbol in SYMBOLS:
