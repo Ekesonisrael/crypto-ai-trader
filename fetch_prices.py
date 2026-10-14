@@ -190,4 +190,7 @@ with open(COOLDOWN_FILE, 'w') as f:
     cooldown_serializable = {k: v.strftime("%Y-%m-%d %H:%M:%S") for k, v in last_signal_times.items()}
     json.dump(cooldown_serializable, f, indent=4)
 
+# Update the fundamental sensor
+news_agent.fetch_fundamentals()
+
 print("Scan complete. Cooldowns saved.")
