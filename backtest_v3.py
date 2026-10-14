@@ -521,10 +521,7 @@ class SymbolData:
         ep = self.o[e]
         return ((TAKER_FEE + SLIPPAGE_ENTRY) * ep + (TAKER_FEE + SLIPPAGE_STOP) * ep) / dd
 
-
 def select_trades(sd, max_cost_r=None):
-    """One position per symbol at a time. (v2 allowed a new trade on every bar while a previous
-    trade was still open, stacking the same position many times.)"""
     rows = []
     next_free = 0
     skipped_cost = skipped_open = 0
@@ -539,12 +536,13 @@ def select_trades(sd, max_cost_r=None):
         if st == S_OPEN:
             skipped_open += 1
             continue
-        if sd.est_cost_r(i) is not None and sd.out[side]['d_frac'][i] * 100 < MIN_STOP_PCT:
-    skipped_cost += 1
-    continue
- if max_cost_r is not None and sd.est_cost_r(i) > max_cost_r:
-    skipped_cost += 1
-    continue
+        # PHASE A: minimum stop distance filter
+        if out['d_frac'][i] * 100 < MIN_STOP_PCT:
+            skipped_cost += 1
+            continue
+        if max_cost_r is not None and sd.est_cost_r(i) > max_cost_r:
+            skipped_cost += 1
+            continue
         xi = int(out['exit_idx'][i])
         e = i + 1
         sl = out['entry_px'][i] - side * out['dist'][i]
