@@ -1,12 +1,21 @@
 {
-    "timestamp": "2026-10-14 15:01:06",
+    "timestamp": "2026-10-14 16:00:37",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Here\u2019s what happened in crypto today",
+            "title": "US inflation rises more than expected - here's what is happening with prices",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -24,6 +33,15 @@
             "url": ""
         },
         {
+            "title": "Standard Chartered pushes $2 trillion stablecoin market forecast to 2030 as supply growth stalls",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
             "title": "Bitcoin Falls as Hot Inflation Puts a Fed Hike Back on the Table",
             "score": -0.6,
             "reason": "FED + HIKE (bearish)",
@@ -33,11 +51,11 @@
             "url": ""
         },
         {
-            "title": "Consumer prices rose 3.7% annually in September as gas prices skyrocket",
+            "title": "Bitcoin Fog operator\u2019s conviction upheld without Chainalysis disclosing source code",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "BTC"
             ],
             "url": ""
         },
@@ -60,6 +78,15 @@
             "url": ""
         },
         {
+            "title": "Bitcoin plunges to $81,300 support as Fed hike odds hit 55% amid $100 million crypto wipeout",
+            "score": -0.6,
+            "reason": "FED + HIKE (bearish)",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
             "title": "Bitcoin price dips below $82K as high oil prices spike US CPI inflation",
             "score": 0.0,
             "reason": "no pattern match",
@@ -67,44 +94,12 @@
                 "BTC"
             ],
             "url": ""
-        },
-        {
-            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Hex Founder Richard Heart Detained in Istanbul on Interpol Red Notice: Report",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Notorious Crypto Celeb Meme Coin Promoter Plots Second Wave on New Launchpad",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC",
-                "ETH",
-                "SOL",
-                "BNB",
-                "XRP",
-                "DOGE"
-            ],
-            "url": ""
         }
     ],
     "per_asset_vetoes": {
         "BTC": {
-            "reason": "FED + HIKE (bearish): Bitcoin Falls as Hot Inflation Puts a Fed Hike Back on the Table",
-            "expires": "2026-10-14 21:01:19"
+            "reason": "FED + HIKE (bearish): Bitcoin plunges to $81,300 support as Fed hike odds hit 55% amid $100 million cr",
+            "expires": "2026-10-14 22:00:54"
         }
     }
 }
