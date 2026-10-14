@@ -1,39 +1,12 @@
 {
-    "timestamp": "2026-10-14 22:01:13",
+    "timestamp": "2026-10-14 23:00:54",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bank of America shares drop after third-quarter revenue miss and regulatory penalty",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "AI Agents Made 138 Million Crypto Payments in a Year. Most Were Tiny",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Patrick Witt exits White House crypto role as Clarity Act stalls",
+            "title": "Coins.ph users face app lockout as central bank intervenes",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -51,11 +24,20 @@
             "url": ""
         },
         {
-            "title": "Organizations join forces to fight Illinois crypto tax, after 6-month pause",
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.072878286 | \ud83d\udeb6 0.07289052 | \ud83d\ude80 0.075545364 Gwei",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 792,612 txs today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
             ],
             "url": ""
         },
@@ -78,20 +60,38 @@
             "url": ""
         },
         {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.126128643 | \ud83d\udeb6 0.126142553 | \ud83d\ude80 0.132869475 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 780,749 txs today",
+            "title": "BTC  SELL SETUP  Short from $81'600",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf BTC Fees: \u26a1 1 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Coinbase reveals how it once guarded cold storage keys with Faraday cages",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "OCC says big banks debanked crypto as it charters crypto firms",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         }
