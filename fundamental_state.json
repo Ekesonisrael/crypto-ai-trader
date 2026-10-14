@@ -1,17 +1,43 @@
 {
-    "timestamp": "2026-10-14 19:01:01",
+    "timestamp": "2026-10-14 20:00:38",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Standard Chartered Opens Bitcoin and Ethereum Trading to Wealthy UAE Clients",
+            "title": "Russia's Biggest Bank Sberbank Wins Approval to Trade Bitcoin",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "BTC",
-                "ETH"
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Here\u2019s what happened in crypto today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Kraken moves to acquire $181 million European bank in major push beyond crypto trading",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "EU authority classifies Circle\u2019s USDC as \u2018significant\u2019 under MiCA",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -25,33 +51,6 @@
             "url": ""
         },
         {
-            "title": "OpenAI\u2019s Sachin Katti to leave infrastructure role, stay on as advisor",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u2018You\u2019re committing crime in broad daylight\u2019: Kalshi CEO defends prediction markets amid insider trading concerns",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
             "title": "Ripple targets trillion-dollar securities markets with new US brokerage and South Korean deals",
             "score": 0.0,
             "reason": "no pattern match",
@@ -61,7 +60,7 @@
             "url": ""
         },
         {
-            "title": "US authorities dismantle crypto scam network that stole tens of millions",
+            "title": "Bitunix Throws a Rooftop Party in Singapore and Showcases Its New Products",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -70,7 +69,16 @@
             "url": ""
         },
         {
-            "title": "Ethereum\u2019s quantum race takes a new turn as zkSync courts banks and Starknet weighs exit",
+            "title": "Canada tops the G7 in peer-to-peer crypto as remittances to Asia hit $2.36B",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.105440924 | \ud83d\udeb6 0.105492926 | \ud83d\ude80 0.128780611 Gwei",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -79,16 +87,7 @@
             "url": ""
         },
         {
-            "title": "OCC report finds debanking efforts tied to crypto activities",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "UK trader sues BitMEX for return of $27M in bitcoin over unlicensed derivatives",
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 810,907 txs today",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
