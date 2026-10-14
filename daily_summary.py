@@ -45,8 +45,32 @@ def fetch_fundamentals():
     except Exception as e:
         print(f"Error fetching fundamentals: {e}")
         
-    with open('fundamental_state.json', 'w') as f:
-        json.dump(state, f, indent=4)
+    if os.path.isfile('fundamental_state.json'):
+    with open('fundamental_state.json', 'r') as f:
+        fund = json.load(f)
+
+    message += "📰 *NEWS LAYER (Phase 4)*\n"
+    message += f"API: `{fund.get('api_status', 'N/A')}`\n"
+    message += f"Market Sentiment: `{fund['sentiment_label']}` ({fund['sentiment_score']:+.2f})\n"
+    message += f"X/Twitter: `{fund['x_sentiment']:+.2f}`\n"
+
+    # Show scored headlines
+    scored = fund.get("headlines_scored", [])
+    if scored:
+        message += "\n*Top scored headlines:*\n"
+        for h in scored[:3]:
+            emoji = "🟢" if h['score'] > 0.2 else ("🔴" if h['score'] < -0.2 else "⚪")
+            message += f"{emoji} {h['title'][:75]}...\n"
+            message += f"   _{h['reason']}_ | {h['score']:+.2f}\n"
+
+    # Active vetoes
+    vetoes = fund.get("per_asset_vetoes", {})
+    if vetoes:
+        message += "\n🚫 *Active Vetoes:*\n"
+        for asset, v in vetoes.items():
+            message += f"• `{asset}`: {v['reason'][:60]}... (until {v['expires'][11:16]} UTC)\n"
+    else:
+        message += "\n✅ No active vetoes.\n" .dump(state, f, indent=4)
         
     print(f"✅ Fundamentals saved. Sentiment: {state['sentiment_label']}")
 
