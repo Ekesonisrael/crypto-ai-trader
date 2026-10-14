@@ -1,12 +1,21 @@
 {
-    "timestamp": "2026-10-14 13:37:31",
-    "api_status": "OK",
+    "timestamp": "2026-10-14 14:01:05",
+    "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Trump's diesel dilemma \u2014 by the numbers",
+            "title": "Here\u2019s what happened in crypto today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Consumer prices rose 3.7% annually in September as gas prices skyrocket",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -16,15 +25,6 @@
         },
         {
             "title": "Bank of America shares drop 7% after third-quarter revenue miss and regulatory penalty",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Consumer prices rose at 3.7% annual rate in September as gas costs skyrocket",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -65,6 +65,20 @@
             "url": ""
         },
         {
+            "title": "Notorious Crypto Celeb Meme Coin Promoter Plots Second Wave on New Launchpad",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC",
+                "ETH",
+                "SOL",
+                "BNB",
+                "XRP",
+                "DOGE"
+            ],
+            "url": ""
+        },
+        {
             "title": "DriveWealth to use Ripple\u2019s RLUSD for stablecoin settlement, cross-border payments",
             "score": 0.0,
             "reason": "no pattern match",
@@ -88,15 +102,6 @@
             "reason": "no pattern match",
             "affected_assets": [
                 "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "How Bitcoin Works",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
             ],
             "url": ""
         }
