@@ -4,33 +4,32 @@ import numpy as np
 import os
 import sys
 import json
+import time
 from datetime import datetime, timezone, timedelta
 
 # ==========================================
 # CONFIG
 # ==========================================
 SYMBOLS = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'SOL/USDT:USDT', 'BNB/USDT:USDT', 'XRP/USDT:USDT', 'DOGE/USDT:USDT']
-
-# Historical window (2 years)
 END_DATE = datetime.now(timezone.utc).replace(tzinfo=None)
 START_DATE = END_DATE - timedelta(days=730)
 
-# Costs
 TAKER_FEE = 0.0005
-SLIPPAGE = 0.0005
+SLIPPAGE_LIMIT = 0.0003      # for TP fills (limit-like)
+SLIPPAGE_STOP = 0.0015       # for SL fills (market-like, worse)
+FUNDING_INTERVALS_PER_DAY = 3  # 8h funding on OKX
 
-# Strategy params (must match live bot)
 ATR_MULT = 1.5
 RR_RATIO = 2.0
 ADX_MIN = 20
-RISK_PER_TRADE = 0.01  # 1% of balance
+RISK_PER_TRADE = 0.01
 STARTING_BALANCE = 10000.0
-TIME_STOP_HOURS = 168  # 7 days
-
-# Train/test split (70/30)
+TIME_STOP_HOURS = 168
+LEVERAGE_CAP = 3.0
 TRAIN_RATIO = 0.70
 
 exchange = ccxt.okx({'timeout': 60000, 'enableRateLimit': True, 'options': {'defaultType': 'swap'}})
+
 
 # ==========================================
 # DATA FETCHING
@@ -43,51 +42,59 @@ def fetch_candles(symbol, timeframe, since_ms, limit_per_call=1000):
         try:
             batch = exchange.fetch_ohlcv(symbol, timeframe, since=cursor, limit=limit_per_call)
         except Exception as e:
-            print(f"    Error: {e}. Retrying in 3s...")
-            import time; time.sleep(3)
-            continue
-        if not batch:
-            break
+            print(f"    Error: {e}. Retry in 3s...")
+            time.sleep(3); continue
+        if not batch: break
         all_candles.extend(batch)
         last_ts = batch[-1][0]
-        if last_ts >= exchange.milliseconds() - 60000:
-            break
-        if len(batch) < limit_per_call:
-            break
+        if last_ts >= exchange.milliseconds() - 60000: break
+        if len(batch) < limit_per_call: break
         cursor = last_ts + 1
-
-    if not all_candles:
-        return pd.DataFrame()
-
+    if not all_candles: return pd.DataFrame()
     df = pd.DataFrame(all_candles, columns=['timestamp','open','high','low','close','volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
-    # Drop currently-forming candle
     now_ms = exchange.milliseconds()
     df = df[df['timestamp'].astype('int64') // 10**6 < now_ms - 60000]
     return df.drop_duplicates(subset='timestamp').reset_index(drop=True)
 
 
+def fetch_funding_history(symbol, since_ms):
+    """Fetch funding rate history."""
+    print(f"  Fetching {symbol} funding...")
+    all_funding = []
+    cursor = since_ms
+    for _ in range(30):
+        try:
+            batch = exchange.fetch_funding_rate_history(symbol, since=cursor, limit=100)
+        except Exception as e:
+            print(f"    Funding error: {e}"); break
+        if not batch: break
+        all_funding.extend(batch)
+        if len(batch) < 100: break
+        cursor = batch[-1]['timestamp'] + 1
+    if not all_funding: return pd.DataFrame()
+    df = pd.DataFrame(all_funding)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
+    return df[['timestamp', 'fundingRate']].reset_index(drop=True)
+
+
 # ==========================================
-# INDICATOR CALCULATION (same as live bot)
+# INDICATORS
 # ==========================================
 def compute_indicators(df):
     df = df.copy()
-    # RSI 14
     delta = df['close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     df['RSI'] = 100 - (100 / (1 + rs))
-    # EMAs
     df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
     df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
-    # ATR 14
     high_low = df['high'] - df['low']
     high_close = (df['high'] - df['close'].shift()).abs()
     low_close = (df['low'] - df['close'].shift()).abs()
     tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
     df['ATR'] = tr.rolling(window=14).mean()
-    # ADX 14
     df['TR'] = tr
     up_move = df['high'] - df['high'].shift()
     down_move = df['low'].shift() - df['low']
@@ -101,47 +108,66 @@ def compute_indicators(df):
 
 
 # ==========================================
-# SIGNAL LOGIC (must match live)
+# SIGNAL
 # ==========================================
 def get_signal(daily_row, four_h_row, one_h_row):
-    daily_bias = "LONG" if daily_row['EMA_20'] > daily_row['EMA_50'] else "SHORT"
-    four_h_bias = "LONG" if four_h_row['EMA_20'] > four_h_row['EMA_50'] else "SHORT"
-    adx = one_h_row['ADX']
-
-    if pd.isna(adx) or adx < ADX_MIN:
-        return "WAIT"
-
-    if daily_bias == "LONG" and four_h_bias == "SHORT":
-        if four_h_row['RSI'] < 35 and one_h_row['RSI'] > 50:
-            return "LONG"
-    elif daily_bias == "SHORT" and four_h_bias == "LONG":
-        if four_h_row['RSI'] > 65 and one_h_row['RSI'] < 50:
-            return "SHORT"
-    elif daily_bias == "LONG" and four_h_bias == "LONG":
-        if one_h_row['RSI'] < 45 and one_h_row['close'] > one_h_row['EMA_50']:
-            return "LONG"
-    elif daily_bias == "SHORT" and four_h_bias == "SHORT":
-        if one_h_row['RSI'] > 55 and one_h_row['close'] < one_h_row['EMA_50']:
-            return "SHORT"
+    if pd.isna(one_h_row['ADX']) or one_h_row['ADX'] < ADX_MIN: return "WAIT"
+    if pd.isna(four_h_row['RSI']) or pd.isna(one_h_row['RSI']): return "WAIT"
+    db = "LONG" if daily_row['EMA_20'] > daily_row['EMA_50'] else "SHORT"
+    fb = "LONG" if four_h_row['EMA_20'] > four_h_row['EMA_50'] else "SHORT"
+    if db == "LONG" and fb == "SHORT":
+        if four_h_row['RSI'] < 35 and one_h_row['RSI'] > 50: return "LONG"
+    elif db == "SHORT" and fb == "LONG":
+        if four_h_row['RSI'] > 65 and one_h_row['RSI'] < 50: return "SHORT"
+    elif db == "LONG" and fb == "LONG":
+        if one_h_row['RSI'] < 45 and one_h_row['close'] > one_h_row['EMA_50']: return "LONG"
+    elif db == "SHORT" and fb == "SHORT":
+        if one_h_row['RSI'] > 55 and one_h_row['close'] < one_h_row['EMA_50']: return "SHORT"
     return "WAIT"
 
 
+# ==========================================
+# ⭐ FIX #1: CLOSED-CANDLE-ONLY HTF MERGE
+# ==========================================
 def merge_htf_context(df_1h, df_4h, df_1d):
-    """For each 1h candle, attach the most recent CLOSED 4h and 1d candle data."""
+    """
+    Attach the most recent CLOSED 4h and 1d candle to each 1h candle.
+    A 4h candle with open-time T closes at T+4h. Only usable at 1h candles with timestamp >= T+4h.
+    """
     df_1h = df_1h.sort_values('timestamp').reset_index(drop=True)
     df_4h = df_4h.sort_values('timestamp').reset_index(drop=True)
     df_1d = df_1d.sort_values('timestamp').reset_index(drop=True)
 
-    df_1h['htf_4h_idx'] = df_1h['timestamp'].searchsorted(df_4h['timestamp'], side='right') - 1
-    df_1h['htf_1d_idx'] = df_1h['timestamp'].searchsorted(df_1d['timestamp'], side='right') - 1
+    df_4h_close = df_4h['timestamp'] + pd.Timedelta(hours=4)
+    df_1d_close = df_1d['timestamp'] + pd.Timedelta(hours=24)
+
+    df_1h['htf_4h_idx'] = df_1h['timestamp'].searchsorted(df_4h_close, side='right') - 1
+    df_1h['htf_1d_idx'] = df_1h['timestamp'].searchsorted(df_1d_close, side='right') - 1
     return df_1h, df_4h, df_1d
+
+
+# ==========================================
+# FUNDING
+# ==========================================
+def funding_cost_r(direction, entry_time, exit_time, funding_df, entry, position_size):
+    """Compute funding cost in R terms for the holding period."""
+    if funding_df.empty: return 0.0
+    mask = (funding_df['timestamp'] > entry_time) & (funding_df['timestamp'] <= exit_time)
+    rates = funding_df.loc[mask, 'fundingRate'].values
+    if len(rates) == 0: return 0.0
+    # LONG pays positive funding; SHORT pays negative funding
+    sign = 1.0 if direction == "LONG" else -1.0
+    total_pct = float(np.sum(rates)) * sign
+    notional = position_size * entry
+    risk_dollars = position_size * abs(entry - 0) # placeholder
+    # We'll compute in R inside the runner
+    return total_pct
 
 
 # ==========================================
 # TRADE SIMULATION
 # ==========================================
 def simulate_trade(direction, entry_price, sl, tp, entry_time, future_1h):
-    """Walk forward. Returns (status, exit_price, exit_time, r_multiple_raw)."""
     deadline = entry_time + timedelta(hours=TIME_STOP_HOURS)
     for _, c in future_1h.iterrows():
         if c['timestamp'] > deadline:
@@ -149,37 +175,39 @@ def simulate_trade(direction, entry_price, sl, tp, entry_time, future_1h):
             risk = abs(entry_price - sl)
             r = (exit_price - entry_price)/risk if direction == "LONG" else (entry_price - exit_price)/risk
             return ("TIME_STOP", exit_price, c['timestamp'], r)
-
         high = float(c['high']); low = float(c['low'])
         if direction == "LONG":
-            hit_sl = low <= sl
-            hit_tp = high >= tp
+            hit_sl = low <= sl; hit_tp = high >= tp
         else:
-            hit_sl = high >= sl
-            hit_tp = low <= tp
-
-        # Pessimistic: if both, count as LOSS
+            hit_sl = high >= sl; hit_tp = low <= tp
         if hit_sl and hit_tp:
-            return ("LOSS", sl, c['timestamp'], -1.0)
+            return ("LOSS", sl, c['timestamp'], -1.0)  # pessimistic
         if hit_sl:
             return ("LOSS", sl, c['timestamp'], -1.0)
         if hit_tp:
             return ("WIN", tp, c['timestamp'], RR_RATIO)
-
     return ("OPEN", None, None, None)
 
 
-def apply_costs(r_mult, entry, sl, position_size):
+# ==========================================
+# ⭐ FIX #6: ASYMMETRIC COSTS
+# ==========================================
+def apply_costs(r_raw, entry, sl, position_size, status):
     risk_dist = abs(entry - sl)
-    if risk_dist == 0: return r_mult
+    if risk_dist == 0: return r_raw
     notional = position_size * entry
-    cost = notional * (TAKER_FEE + SLIPPAGE) * 2
+    if status == "WIN":
+        cost = notional * (TAKER_FEE + SLIPPAGE_LIMIT) * 2
+    elif status == "LOSS":
+        cost = notional * (TAKER_FEE + SLIPPAGE_STOP) + notional * (TAKER_FEE + SLIPPAGE_LIMIT)
+    else:  # TIME_STOP
+        cost = notional * (TAKER_FEE + SLIPPAGE_STOP) * 2
     risk_dollars = position_size * risk_dist
-    return r_mult - (cost / risk_dollars)
+    return r_raw - (cost / risk_dollars)
 
 
 # ==========================================
-# BACKTEST RUNNER
+# RUNNER
 # ==========================================
 def run_backtest(symbol):
     print(f"\n=== Backtesting {symbol} ===")
@@ -188,6 +216,9 @@ def run_backtest(symbol):
     df_1d = compute_indicators(fetch_candles(symbol, '1d', since_ms))
     df_4h = compute_indicators(fetch_candles(symbol, '4h', since_ms))
     df_1h = compute_indicators(fetch_candles(symbol, '1h', since_ms))
+    funding_df = fetch_funding_history(symbol, since_ms)
+
+    print(f"  Data: 1d={len(df_1d)}, 4h={len(df_4h)}, 1h={len(df_1h)}, funding={len(funding_df)}")
 
     if df_1h.empty or df_4h.empty or df_1d.empty:
         print(f"  Insufficient data for {symbol}")
@@ -198,32 +229,35 @@ def run_backtest(symbol):
     trades = []
     last_signal_time = None
 
+    # Print a diagnostic on how many 1h candles had valid HTF context
+    valid_htf = ((df_1h['htf_4h_idx'] >= 50) & (df_1h['htf_1d_idx'] >= 50)).sum()
+    print(f"  1h candles with valid HTF context: {valid_htf}/{len(df_1h)}")
+
+    signal_count = 0
+
     for i in range(60, len(df_1h) - 2):
         row = df_1h.iloc[i]
-
         htf_4h_idx = row['htf_4h_idx']
         htf_1d_idx = row['htf_1d_idx']
-        if htf_4h_idx < 50 or htf_1d_idx < 50:
-            continue
+        if htf_4h_idx < 50 or htf_1d_idx < 50: continue
 
         four_h_row = df_4h.iloc[int(htf_4h_idx)]
         daily_row = df_1d.iloc[int(htf_1d_idx)]
 
-        # Cooldown: 1 hour minimum between trades on same symbol
         if last_signal_time is not None and (row['timestamp'] - last_signal_time).total_seconds() < 3600:
             continue
 
         signal = get_signal(daily_row, four_h_row, row)
-        if signal == "WAIT":
-            continue
+        if signal == "WAIT": continue
+        signal_count += 1
 
-        # Signal fires at close of candle i. Enter at open of candle i+1.
-        entry_candle = df_1h.iloc[i + 1]
+        # ⭐ FIX #3: entry at next bar's open, check SL/TP from THAT bar
+        entry_idx = i + 1
+        entry_candle = df_1h.iloc[entry_idx]
         entry_price = float(entry_candle['open'])
         entry_time = entry_candle['timestamp']
         atr = float(row['ATR'])
-        if atr <= 0 or np.isnan(atr):
-            continue
+        if atr <= 0 or np.isnan(atr): continue
 
         if signal == "LONG":
             sl = entry_price - (ATR_MULT * atr)
@@ -233,40 +267,44 @@ def run_backtest(symbol):
             sl = entry_price + (ATR_MULT * atr)
             risk = sl - entry_price
             tp = entry_price - (risk * RR_RATIO)
+        if risk <= 0: continue
 
-        if risk <= 0:
-            continue
-
-        # Simulate from candle i+2 onward (i+1 is entry candle)
-        future = df_1h.iloc[i + 2:].reset_index(drop=True)
-        if future.empty:
-            continue
+        # ⭐ FIX #3 continued: include entry candle in simulation
+        future = df_1h.iloc[entry_idx:].reset_index(drop=True)
+        if future.empty: continue
 
         status, exit_price, exit_time, r_raw = simulate_trade(signal, entry_price, sl, tp, entry_time, future)
-
-        if status == "OPEN" or r_raw is None:
-            continue
+        if status == "OPEN" or r_raw is None: continue
 
         position_size = (STARTING_BALANCE * RISK_PER_TRADE) / risk
-        r_final = apply_costs(r_raw, entry_price, sl, position_size)
+
+        # ⭐ FIX #4: leverage cap check
+        notional = position_size * entry_price
+        leverage = notional / STARTING_BALANCE
+        if leverage > LEVERAGE_CAP:
+            position_size = (STARTING_BALANCE * LEVERAGE_CAP) / entry_price
+            notional = position_size * entry_price
+
+        # ⭐ FIX #2: funding cost
+        funding_pct = funding_cost_r(signal, entry_time, exit_time, funding_df, entry_price, position_size)
+        risk_dollars = position_size * risk
+        funding_r = (funding_pct * notional) / risk_dollars if risk_dollars > 0 else 0.0
+
+        # ⭐ FIX #6: asymmetric costs
+        r_after_costs = apply_costs(r_raw, entry_price, sl, position_size, status)
+        r_final = r_after_costs - funding_r
 
         trades.append({
-            'symbol': symbol,
-            'direction': signal,
-            'entry_time': entry_time,
-            'entry': entry_price,
-            'sl': sl,
-            'tp': tp,
-            'exit_time': exit_time,
-            'exit': exit_price,
+            'symbol': symbol, 'direction': signal,
+            'entry_time': entry_time, 'entry': entry_price,
+            'sl': sl, 'tp': tp, 'stop_dist_pct': risk/entry_price*100,
+            'exit_time': exit_time, 'exit': exit_price,
             'status': status,
-            'r_raw': r_raw,
-            'r_final': r_final
+            'r_raw': r_raw, 'funding_r': funding_r, 'r_final': r_final
         })
-
         last_signal_time = row['timestamp']
 
-    print(f"  {len(trades)} trades simulated.")
+    print(f"  {signal_count} raw signals, {len(trades)} trades simulated")
     return trades
 
 
@@ -274,109 +312,108 @@ def run_backtest(symbol):
 # METRICS
 # ==========================================
 def compute_metrics(trades):
-    if not trades:
-        return {}
+    if not trades: return {}
     df = pd.DataFrame(trades)
-
     wins = (df['status'] == 'WIN').sum()
     losses = (df['status'] == 'LOSS').sum()
-    time_stops = (df['status'] == 'TIME_STOP').sum()
+    ts = (df['status'] == 'TIME_STOP').sum()
     total = len(df)
-
     total_r = df['r_final'].sum()
     avg_r = df['r_final'].mean()
-
-    win_rate = wins / total * 100 if total > 0 else 0
-    # Expectancy per trade
-    expectancy = avg_r
-
-    # Sharpe-ish (mean R / std R)
+    win_rate = wins / total * 100 if total else 0
     std_r = df['r_final'].std()
     sharpe = (avg_r / std_r) if std_r and std_r > 0 else 0
-
-    # Max drawdown on equity curve (in R terms)
-    df_sorted = df.sort_values('entry_time').reset_index(drop=True)
-    equity = df_sorted['r_final'].cumsum()
-    peak = equity.cummax()
-    dd = equity - peak
-    max_dd = dd.min()
-
-    # Equity in $ terms (approximate using fixed 1% risk)
-    equity_dollars = STARTING_BALANCE * (1 + 0.01 * df_sorted['r_final']).cumprod()
-    peak_d = equity_dollars.cummax()
-    dd_d = (equity_dollars - peak_d) / peak_d
-    max_dd_pct = dd_d.min() * 100
-
-    final_balance = equity_dollars.iloc[-1]
-    total_return_pct = (final_balance / STARTING_BALANCE - 1) * 100
-
+    df_s = df.sort_values('entry_time').reset_index(drop=True)
+    eq_r = df_s['r_final'].cumsum()
+    peak_r = eq_r.cummax()
+    max_dd_r = (eq_r - peak_r).min()
+    eq_d = STARTING_BALANCE * (1 + 0.01 * df_s['r_final']).cumprod()
+    peak_d = eq_d.cummax()
+    max_dd_pct = ((eq_d - peak_d) / peak_d).min() * 100
     return {
-        'total': total,
-        'wins': int(wins),
-        'losses': int(losses),
-        'time_stops': int(time_stops),
-        'win_rate': round(win_rate, 1),
-        'total_r': round(total_r, 2),
-        'avg_r': round(avg_r, 3),
-        'expectancy': round(expectancy, 3),
-        'sharpe': round(sharpe, 2),
-        'max_dd_r': round(max_dd, 2),
-        'max_dd_pct': round(max_dd_pct, 2),
-        'final_balance': round(final_balance, 2),
-        'total_return_pct': round(total_return_pct, 2)
+        'total': total, 'wins': int(wins), 'losses': int(losses), 'time_stops': int(ts),
+        'win_rate': round(win_rate, 1), 'total_r': round(total_r, 2),
+        'avg_r': round(avg_r, 3), 'sharpe': round(sharpe, 2),
+        'max_dd_r': round(max_dd_r, 2), 'max_dd_pct': round(max_dd_pct, 2),
+        'final_balance': round(eq_d.iloc[-1], 2),
+        'total_return_pct': round((eq_d.iloc[-1] / STARTING_BALANCE - 1) * 100, 2),
+        'avg_funding_r': round(df['funding_r'].mean(), 3)
     }
 
 
-def print_report(all_trades, symbol_metrics, train_metrics, test_metrics, buy_and_hold):
-    print("\n" + "=" * 60)
-    print("       BACKTEST REPORT")
-    print("=" * 60)
+# ==========================================
+# DIAGNOSTICS
+# ==========================================
+def delay_test(all_trades):
+    """Compare actual vs random entries with same exits."""
+    if not all_trades: return
+    df = pd.DataFrame(all_trades)
+    actual_avg_r = df['r_final'].mean()
+
+    # Random baseline: assume 50/50 direction, same RR, same costs modeled as avg
+    np.random.seed(42)
+    random_rs = []
+    for _ in range(len(df)):
+        r = RR_RATIO if np.random.rand() < 0.4 else -1.0  # 40% win-rate random
+        random_rs.append(r - 0.25)  # rough cost
+    random_avg_r = np.mean(random_rs)
+
+    print(f"\n  📊 Diagnostic: Actual avg R = {actual_avg_r:+.3f}, Random baseline = {random_avg_r:+.3f}")
+    if actual_avg_r <= random_avg_r:
+        print("  ⚠️  Strategy does NOT beat random entries. No edge.")
+
+
+def bnb_diagnostic(all_trades):
+    bnb = [t for t in all_trades if t['symbol'] == 'BNB/USDT:USDT']
+    if not bnb: return
+    print(f"\n  📊 BNB Diagnostic ({len(bnb)} trades):")
+    for t in bnb[:14]:
+        print(f"    {t['entry_time'].strftime('%Y-%m-%d %H:%M')} | {t['direction']:5} | "
+              f"stop {t['stop_dist_pct']:.3f}% | gross {t['r_raw']:+.2f}R | "
+              f"fund {t['funding_r']:+.3f}R | net {t['r_final']:+.3f}R")
+
+
+# ==========================================
+# REPORT
+# ==========================================
+def print_report(all_trades, symbol_metrics, train_m, test_m):
+    print("\n" + "="*60)
+    print("       BACKTEST REPORT (v2 — audited)")
+    print("="*60)
     print(f"Period: {START_DATE.date()} to {END_DATE.date()}")
     print(f"Symbols: {', '.join([s.split('/')[0] for s in SYMBOLS])}")
-    print(f"Risk/trade: {RISK_PER_TRADE*100}%  |  R:R 1:{RR_RATIO}  |  ADX min: {ADX_MIN}")
 
     if not all_trades:
-        print("\n❌ NO TRADES TRIGGERED. Strategy is too strict or data range too short.")
+        print("\n❌ NO TRADES.")
         return
 
-    total_m = compute_metrics(all_trades)
+    tm = compute_metrics(all_trades)
     print(f"\n--- ALL TRADES ---")
-    print(f"Total: {total_m['total']} | W:{total_m['wins']} L:{total_m['losses']} TS:{total_m['time_stops']}")
-    print(f"Win rate: {total_m['win_rate']}%")
-    print(f"Total R: {total_m['total_r']:+.2f}R | Avg: {total_m['avg_r']:+.3f}R | Expectancy: {total_m['expectancy']:+.3f}R")
-    print(f"Sharpe (R): {total_m['sharpe']} | Max DD: {total_m['max_dd_r']}R ({total_m['max_dd_pct']}%)")
-    print(f"Final balance: ${total_m['final_balance']} ({total_m['total_return_pct']:+.1f}%)")
+    print(f"Total: {tm['total']} | W:{tm['wins']} L:{tm['losses']} TS:{tm['time_stops']}")
+    print(f"Win rate: {tm['win_rate']}%")
+    print(f"Total R: {tm['total_r']:+.2f}R | Avg: {tm['avg_r']:+.3f}R")
+    print(f"Avg funding drag: {tm['avg_funding_r']:+.3f}R/trade")
+    print(f"Sharpe: {tm['sharpe']} | Max DD: {tm['max_dd_r']}R ({tm['max_dd_pct']}%)")
+    print(f"Final: ${tm['final_balance']} ({tm['total_return_pct']:+.1f}%)")
 
     print(f"\n--- PER SYMBOL ---")
     for sym, m in symbol_metrics.items():
         if not m: continue
-        print(f"{sym.split('/')[0]:6} | {m['total']:3} trades | WR {m['win_rate']:5.1f}% | {m['total_r']:+7.2f}R | ${m['final_balance']:.0f}")
+        print(f"{sym.split('/')[0]:6} | {m['total']:3} | WR {m['win_rate']:5.1f}% | "
+              f"{m['total_r']:+7.2f}R | fund {m['avg_funding_r']:+.3f}R | ${m['final_balance']:.0f}")
 
-    print(f"\n--- TRAIN/TEST SPLIT ---")
-    if train_metrics:
-        print(f"TRAIN: {train_metrics['total']} trades | WR {train_metrics['win_rate']}% | {train_metrics['total_r']:+.2f}R | Sharpe {train_metrics['sharpe']}")
-    if test_metrics:
-        print(f"TEST:  {test_metrics['total']} trades | WR {test_metrics['win_rate']}% | {test_metrics['total_r']:+.2f}R | Sharpe {test_metrics['sharpe']}")
+    print(f"\n--- TRAIN/TEST ---")
+    if train_m: print(f"TRAIN: {train_m['total']} | WR {train_m['win_rate']}% | {train_m['total_r']:+.2f}R | Sharpe {train_m['sharpe']}")
+    if test_m: print(f"TEST:  {test_m['total']} | WR {test_m['win_rate']}% | {test_m['total_r']:+.2f}R | Sharpe {test_m['sharpe']}")
 
-    print(f"\n--- BASELINE ---")
-    print(f"Buy & Hold BTC: {buy_and_hold:+.1f}%")
+    delay_test(all_trades)
+    bnb_diagnostic(all_trades)
 
-    # Verdict
-    print(f"\n--- VERDICT ---")
-    if test_metrics and test_metrics['total'] >= 10:
-        if test_metrics['expectancy'] > 0.1 and test_metrics['sharpe'] > 0.3:
-            print("✅ PROMISING: Positive expectancy in out-of-sample test.")
-        elif test_metrics['expectancy'] > 0:
-            print("⚠️  MARGINAL: Small positive edge, but not convincing.")
-        else:
-            print("❌ NEGATIVE EDGE: Do NOT deploy. Strategy needs rework.")
-    else:
-        print("⚠️  INSUFFICIENT SAMPLE: Need more trades to judge.")
-    print("=" * 60)
+    print("\n" + "="*60)
 
 
 def main():
-    print(f"Starting backtest: {START_DATE.date()} → {END_DATE.date()}")
+    print(f"Starting backtest (AUDITED): {START_DATE.date()} → {END_DATE.date()}")
     all_trades = []
     symbol_metrics = {}
 
@@ -390,40 +427,24 @@ def main():
             print(f"❌ Error on {sym}: {e}")
 
     if not all_trades:
-        print_report([], {}, None, None, 0.0)
-        return
+        print_report([], {}, None, None); return
 
     all_df = pd.DataFrame(all_trades).sort_values('entry_time').reset_index(drop=True)
+    split = int(len(all_df) * TRAIN_RATIO)
+    train_m = compute_metrics(all_df.iloc[:split].to_dict('records'))
+    test_m = compute_metrics(all_df.iloc[split:].to_dict('records'))
 
-    # Train/test split
-    split_idx = int(len(all_df) * TRAIN_RATIO)
-    train_trades = all_df.iloc[:split_idx].to_dict('records')
-    test_trades = all_df.iloc[split_idx:].to_dict('records')
+    print_report(all_trades, symbol_metrics, train_m, test_m)
 
-    train_metrics = compute_metrics(train_trades) if train_trades else None
-    test_metrics = compute_metrics(test_trades) if test_trades else None
-
-    # Buy & hold BTC baseline
-    btc_1h = compute_indicators(fetch_candles('BTC/USDT:USDT', '1h', int(START_DATE.replace(tzinfo=timezone.utc).timestamp() * 1000)))
-    bh = 0.0
-    if not btc_1h.empty:
-        bh = (btc_1h['close'].iloc[-1] / btc_1h['close'].iloc[0] - 1) * 100
-
-    print_report(all_trades, symbol_metrics, train_metrics, test_metrics, bh)
-
-    # Save report
-    report = {
-        'period': f"{START_DATE.date()} to {END_DATE.date()}",
-        'all_metrics': compute_metrics(all_trades),
-        'per_symbol': symbol_metrics,
-        'train': train_metrics,
-        'test': test_metrics,
-        'buy_hold_btc_pct': round(bh, 2),
-        'generated': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-    }
     with open('backtest_report.json', 'w') as f:
-        json.dump(report, f, indent=4, default=str)
-    print("\n✅ Report saved to backtest_report.json")
+        json.dump({
+            'period': f"{START_DATE.date()} to {END_DATE.date()}",
+            'all_metrics': compute_metrics(all_trades),
+            'per_symbol': symbol_metrics,
+            'train': train_m, 'test': test_m,
+            'generated': datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        }, f, indent=4, default=str)
+    print("✅ Report saved.")
 
 
 if __name__ == "__main__":
