@@ -44,6 +44,7 @@ ADX_MIN = 20
 RSI_4H_OVERSOLD, RSI_4H_OVERBOUGHT = 35, 65
 RSI_1H_PULLBACK_LONG, RSI_1H_PULLBACK_SHORT = 45, 55
 TIME_STOP_HOURS = 168
+MIN_STOP_PCT = 1.5    # reject signals where the ATR stop is tighter than this % of entry
 
 # --- Indicators ---
 USE_WILDER = True      # True = standard Wilder smoothing (TradingView/TA-Lib style).
