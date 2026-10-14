@@ -2,12 +2,8 @@ name: Daily Market Pulse
 
 on:
   schedule:
-    # 8:00 AM Nigeria (7:00 UTC)
-    - cron: '0 7 * * *'
-    # 2:00 PM Nigeria (13:00 UTC)
-    - cron: '0 13 * * *'
-    # 9:00 PM Nigeria (20:00 UTC)
-    - cron: '0 20 * * *'
+    # Runs every 4 hours (Midnight, 4 AM, 8 AM, Noon, 4 PM, 8 PM UTC)
+    - cron: '0 0,4,8,12,16,20 * * *'
   workflow_dispatch: # Allows manual testing
 
 jobs:
