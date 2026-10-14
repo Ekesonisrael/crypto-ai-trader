@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
+import news_agent
 
 # TELEGRAM SETTINGS
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -37,10 +38,15 @@ def get_bias(symbol, timeframe):
     last = df.iloc[-1]
     return "LONG" if last['EMA_20'] > last['EMA_50'] else "SHORT"
 
-print("Generating Daily Market Pulse...")
+print("Generating Market Pulse...")
 
-message = "📊 *DAILY MARKET PULSE* 📊\n"
+# Fetch Fundamental Data Once
+news_status, news_reason = news_agent.check_news_impact()
+
+message = "📊 *MARKET PULSE (4-HOUR DIGEST)* 📊\n"
 message += f"_{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_\n\n"
+message += f"📰 *Fundamental News:* `{news_status}`\n"
+message += f"_{news_reason}_\n\n"
 message += "Here is what your AI is seeing right now:\n\n"
 
 for symbol in SYMBOLS:
@@ -62,4 +68,4 @@ for symbol in SYMBOLS:
 message += "🤖 _The bot is alive and waiting for a perfect setup._"
 
 send_telegram_message(message)
-print("Daily Pulse sent to Telegram!")
+print("Market Pulse sent to Telegram!")
