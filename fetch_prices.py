@@ -6,6 +6,7 @@ import os
 import requests
 import json
 from datetime import datetime, timezone
+import news_agent
 
 # ==========================================
 # CONFIG
