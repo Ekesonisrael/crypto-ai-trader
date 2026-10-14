@@ -1,30 +1,39 @@
 {
-    "timestamp": "2026-10-14 16:00:37",
+    "timestamp": "2026-10-14 17:00:38",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "US inflation rises more than expected - here's what is happening with prices",
+            "title": "Bank of America shares drop 8% after third-quarter revenue miss and regulatory penalty",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "'It Can Take Years': Coinbase Presses for Bitcoin Quantum Migration to Start Now",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
+            "score": -0.6,
+            "reason": "FED + HIKE (bearish)",
+            "affected_assets": [
+                "BTC"
             ],
             "url": ""
         },
         {
             "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bank of America shares drop 8% after third-quarter revenue miss and regulatory penalty",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -42,11 +51,29 @@
             "url": ""
         },
         {
-            "title": "Bitcoin Falls as Hot Inflation Puts a Fed Hike Back on the Table",
-            "score": -0.6,
-            "reason": "FED + HIKE (bearish)",
+            "title": "Strive\u2019s new $500 million Bitcoin financing plan comes with a $257 million annual dividend problem",
+            "score": 0.0,
+            "reason": "no pattern match",
             "affected_assets": [
                 "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Standard Chartered pushes $2T stablecoin forecast to 2030 as transaction volumes grow",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Hacker Pulls $86,000 in Locked Tokens From a Shared Crypto Vault",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -60,46 +87,19 @@
             "url": ""
         },
         {
-            "title": "Strive buys $235 million in bitcoin as warrant exercises yield $369 million",
+            "title": "HEX founder Richard Heart arrested with \u2018electronic devices\u2019 in Istanbul via Interpol warrant",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Low East Coast diesel stocks could delay inflation relief for Bitcoin investors",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin plunges to $81,300 support as Fed hike odds hit 55% amid $100 million crypto wipeout",
-            "score": -0.6,
-            "reason": "FED + HIKE (bearish)",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin price dips below $82K as high oil prices spike US CPI inflation",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
+                "GLOBAL"
             ],
             "url": ""
         }
     ],
     "per_asset_vetoes": {
         "BTC": {
-            "reason": "FED + HIKE (bearish): Bitcoin plunges to $81,300 support as Fed hike odds hit 55% amid $100 million cr",
-            "expires": "2026-10-14 22:00:54"
+            "reason": "FED + HIKE (bearish): Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
+            "expires": "2026-10-14 23:00:58"
         }
     }
 }
