@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-14 14:01:05",
+    "timestamp": "2026-10-14 15:01:06",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -15,6 +15,24 @@
             "url": ""
         },
         {
+            "title": "Bank of America shares drop 8% after third-quarter revenue miss and regulatory penalty",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin Falls as Hot Inflation Puts a Fed Hike Back on the Table",
+            "score": -0.6,
+            "reason": "FED + HIKE (bearish)",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
             "title": "Consumer prices rose 3.7% annually in September as gas prices skyrocket",
             "score": 0.0,
             "reason": "no pattern match",
@@ -24,11 +42,29 @@
             "url": ""
         },
         {
-            "title": "Bank of America shares drop 7% after third-quarter revenue miss and regulatory penalty",
+            "title": "Strive buys $235 million in bitcoin as warrant exercises yield $369 million",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Low East Coast diesel stocks could delay inflation relief for Bitcoin investors",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin price dips below $82K as high oil prices spike US CPI inflation",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
             ],
             "url": ""
         },
@@ -42,25 +78,11 @@
             "url": ""
         },
         {
-            "title": "BNY, Citadel Securities complete Treasury repo in first use of tokenized assets on major triparty platform",
+            "title": "Hex Founder Richard Heart Detained in Istanbul on Interpol Red Notice: Report",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "BTC",
-                "ETH",
-                "SOL",
-                "BNB",
-                "XRP",
-                "DOGE"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Strategy\u2019s preferred stock financing may cost it bitcoin, K33 argues",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -77,34 +99,12 @@
                 "DOGE"
             ],
             "url": ""
-        },
-        {
-            "title": "DriveWealth to use Ripple\u2019s RLUSD for stablecoin settlement, cross-border payments",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "XRP"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Polygon Labs completes Coinme acquisition, bringing regulated payments coverage across 48 US states",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Ethereum price prediction 2026-2032: Will ETH reach $5,000 soon?",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
         }
     ],
-    "per_asset_vetoes": {}
+    "per_asset_vetoes": {
+        "BTC": {
+            "reason": "FED + HIKE (bearish): Bitcoin Falls as Hot Inflation Puts a Fed Hike Back on the Table",
+            "expires": "2026-10-14 21:01:19"
+        }
+    }
 }
