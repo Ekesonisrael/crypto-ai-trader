@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-14 18:01:00",
+    "timestamp": "2026-10-14 19:01:01",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -12,6 +12,15 @@
             "affected_assets": [
                 "BTC",
                 "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Major shareholder presses SkyAI on Solana sales after treasury shrinks 70% in a month",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "SOL"
             ],
             "url": ""
         },
@@ -34,24 +43,6 @@
             "url": ""
         },
         {
-            "title": "Bank of America shares drop 8% after third-quarter revenue miss and regulatory penalty",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
-            "score": -0.6,
-            "reason": "FED + HIKE (bearish)",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
             "title": "\u2018You\u2019re committing crime in broad daylight\u2019: Kalshi CEO defends prediction markets amid insider trading concerns",
             "score": 0.0,
             "reason": "no pattern match",
@@ -61,11 +52,20 @@
             "url": ""
         },
         {
-            "title": "'It Can Take Years': Coinbase Presses for Bitcoin Quantum Migration to Start Now",
+            "title": "Ripple targets trillion-dollar securities markets with new US brokerage and South Korean deals",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "BTC"
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "US authorities dismantle crypto scam network that stole tens of millions",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -88,7 +88,7 @@
             "url": ""
         },
         {
-            "title": "Bitmex Faces $26 Million Claim Over 1,053 Losing Bitcoin Trades",
+            "title": "UK trader sues BitMEX for return of $27M in bitcoin over unlicensed derivatives",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -97,10 +97,5 @@
             "url": ""
         }
     ],
-    "per_asset_vetoes": {
-        "BTC": {
-            "reason": "FED + HIKE (bearish): Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
-            "expires": "2026-10-15 00:01:14"
-        }
-    }
+    "per_asset_vetoes": {}
 }
