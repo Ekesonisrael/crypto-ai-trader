@@ -46,15 +46,15 @@ jobs:
         if: ${{ inputs.command == 'full' }}
         run: python backtest_v3.py --days 730
 
-      - name: Commit report
-        if: ${{ inputs.command != 'selftest' }}
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add backtest_report.json backtest_trades.csv .bt_cache/ 2>/dev/null || true
-          git diff --quiet && git diff --staged --quiet || git commit -m "backtest: run [skip ci]"
-          git pull --rebase origin main || true
-          git push || true
+      - - name: Commit report
+  if: ${{ inputs.command != 'selftest' }}
+  run: |
+    git config --local user.email "action@github.com"
+    git config --local user.name "GitHub Action"
+    git add -A
+    git diff --quiet && git diff --staged --quiet || git commit -m "backtest: run [skip ci]"
+    git pull --rebase origin main || true
+    git push || true
 
       - name: Upload artifacts
         if: ${{ inputs.command != 'selftest' }}
