@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-14 20:00:38",
+    "timestamp": "2026-10-14 21:00:42",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -16,6 +16,42 @@
         },
         {
             "title": "Here\u2019s what happened in crypto today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bank of America shares drop after third-quarter revenue miss and regulatory penalty",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "AI Agents Made 138 Million Crypto Payments in a Year. Most Were Tiny",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Patrick Witt exits White House crypto role as Clarity Act stalls",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -42,20 +78,11 @@
             "url": ""
         },
         {
-            "title": "Major shareholder presses SkyAI on Solana sales after treasury shrinks 70% in a month",
+            "title": "\u767d\u5bab\u52a0\u5bc6\u987e\u95ee Patrick Witt \u79bb\u4efb\uff0cClarity Act \u7acb\u6cd5\u53d7\u963b",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "SOL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Ripple targets trillion-dollar securities markets with new US brokerage and South Korean deals",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "XRP"
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -65,33 +92,6 @@
             "reason": "no pattern match",
             "affected_assets": [
                 "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Canada tops the G7 in peer-to-peer crypto as remittances to Asia hit $2.36B",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.105440924 | \ud83d\udeb6 0.105492926 | \ud83d\ude80 0.128780611 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 810,907 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
             ],
             "url": ""
         }
