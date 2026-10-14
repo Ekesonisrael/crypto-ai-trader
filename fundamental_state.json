@@ -1,0 +1,105 @@
+{
+    "timestamp": "2026-10-14 13:37:31",
+    "api_status": "OK",
+    "sentiment_score": 0.0,
+    "sentiment_label": "Neutral",
+    "x_sentiment": 0.0,
+    "headlines_scored": [
+        {
+            "title": "Trump's diesel dilemma \u2014 by the numbers",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bank of America shares drop 7% after third-quarter revenue miss and regulatory penalty",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Consumer prices rose at 3.7% annual rate in September as gas costs skyrocket",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "BNY, Citadel Securities complete Treasury repo in first use of tokenized assets on major triparty platform",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC",
+                "ETH",
+                "SOL",
+                "BNB",
+                "XRP",
+                "DOGE"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Strategy\u2019s preferred stock financing may cost it bitcoin, K33 argues",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "DriveWealth to use Ripple\u2019s RLUSD for stablecoin settlement, cross-border payments",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Polygon Labs completes Coinme acquisition, bringing regulated payments coverage across 48 US states",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Ethereum price prediction 2026-2032: Will ETH reach $5,000 soon?",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "How Bitcoin Works",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        }
+    ],
+    "per_asset_vetoes": {}
+}
