@@ -45,8 +45,8 @@ jobs:
         run: python backtest_v3.py --days 90 --symbols BTC ETH --no-cache
 
       - name: Full run
-       if: inputs.command == 'full'
-       run: python backtest_v3.py --days 730 --no-cache
+        if: inputs.command == 'full'
+        run: python backtest_v3.py --days 730 --no-cache
 
       - name: Commit results
         if: inputs.command != 'selftest'
