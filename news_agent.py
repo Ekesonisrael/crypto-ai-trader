@@ -1,10 +1,13 @@
 import requests
 import json
 import os
+import time
 from datetime import datetime, timezone, timedelta
 
 FUNDAMENTAL_FILE = 'fundamental_state.json'
 VETO_DURATION_HOURS = 6
+HTTP_TIMEOUT = 15
+HTTP_RETRIES = 2
 
 SENTIMENT_PATTERNS = [
     {
@@ -49,6 +52,21 @@ ASSET_KEYWORDS = {
 }
 
 GLOBAL_SUBJECTS = ["FED", "FEDERAL RESERVE", "SEC", "CRYPTO MARKET", "EXCHANGE HACK", "BINANCE HACK", "COINBASE HACK"]
+
+def http_get_with_retries(url, timeout=HTTP_TIMEOUT, retries=HTTP_RETRIES):
+    """Attempt a GET request with retries. Returns (status_ok, data_or_error)."""
+    last_err = None
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, timeout=timeout)
+            if r.status_code == 200:
+                return True, r.json()
+            last_err = f"HTTP {r.status_code}"
+        except Exception as e:
+            last_err = str(e)
+        if attempt < retries - 1:
+            time.sleep(2)
+    return False, last_err
 
 def score_headline(title):
     upper = title.upper()
@@ -101,59 +119,60 @@ def fetch_fundamentals():
         "per_asset_vetoes": {}
     }
 
-    try:
-        try:
-            r1 = requests.get("https://cryptocurrency.cv/api/sentiment", timeout=10)
-            if r1.status_code == 200:
-                data = r1.json()
-                state["sentiment_score"] = float(data.get("score", 0.0))
-                state["sentiment_label"] = data.get("label", "Neutral")
-        except Exception as e:
-            print(f"  ⚠️ Sentiment endpoint failed: {e}")
-            state["api_status"] = "DEGRADED"
+    degraded = False
 
-        try:
-            r2 = requests.get("https://cryptocurrency.cv/api/social/x/sentiment", timeout=10)
-            if r2.status_code == 200:
-                data = r2.json()
-                state["x_sentiment"] = float(data.get("score", 0.0))
-        except Exception as e:
-            print(f"  ⚠️ X sentiment endpoint failed: {e}")
+    # ---- Endpoint 1: Overall sentiment ----
+    ok, result = http_get_with_retries("https://cryptocurrency.cv/api/sentiment")
+    if ok:
+        state["sentiment_score"] = float(result.get("score", 0.0))
+        state["sentiment_label"] = result.get("label", "Neutral")
+    else:
+        print(f"  ⚠️ Sentiment endpoint failed: {result}")
+        degraded = True
 
-        try:
-            r3 = requests.get("https://cryptocurrency.cv/api/breaking", timeout=10)
-            if r3.status_code == 200:
-                data = r3.json()
-                articles = data.get("articles", [])[:10]
-                for art in articles:
-                    title = art.get("title", "")
-                    if not title: continue
-                    score, reason = score_headline(title)
-                    affected = affected_assets(title)
-                    entry = {
-                        "title": title,
-                        "score": round(score, 2),
-                        "reason": reason or "no pattern match",
-                        "affected_assets": affected or ["GLOBAL"],
-                        "url": art.get("url", "")
+    # ---- Endpoint 2: X/Twitter sentiment ----
+    ok, result = http_get_with_retries("https://cryptocurrency.cv/api/social/x/sentiment")
+    if ok:
+        state["x_sentiment"] = float(result.get("score", 0.0))
+    else:
+        print(f"  ⚠️ X sentiment endpoint failed: {result}")
+        degraded = True
+
+    # ---- Endpoint 3: Breaking news ----
+    ok, result = http_get_with_retries("https://cryptocurrency.cv/api/breaking")
+    if ok:
+        articles = result.get("articles", [])[:10]
+        for art in articles:
+            title = art.get("title", "")
+            if not title: continue
+            score, reason = score_headline(title)
+            affected = affected_assets(title)
+            entry = {
+                "title": title,
+                "score": round(score, 2),
+                "reason": reason or "no pattern match",
+                "affected_assets": affected or ["GLOBAL"],
+                "url": art.get("url", "")
+            }
+            state["headlines_scored"].append(entry)
+
+            if score <= -0.6:
+                expires = (datetime.now(timezone.utc) + timedelta(hours=VETO_DURATION_HOURS)).strftime("%Y-%m-%d %H:%M:%S")
+                targets = affected if affected else ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE"]
+                for asset in targets:
+                    state["per_asset_vetoes"][asset] = {
+                        "reason": f"{reason}: {title[:80]}",
+                        "expires": expires
                     }
-                    state["headlines_scored"].append(entry)
+    else:
+        print(f"  ⚠️ News endpoint failed: {result}")
+        degraded = True
 
-                    if score <= -0.6:
-                        expires = (datetime.now(timezone.utc) + timedelta(hours=VETO_DURATION_HOURS)).strftime("%Y-%m-%d %H:%M:%S")
-                        targets = affected if affected else ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE"]
-                        for asset in targets:
-                            state["per_asset_vetoes"][asset] = {
-                                "reason": f"{reason}: {title[:80]}",
-                                "expires": expires
-                            }
-        except Exception as e:
-            print(f"  ⚠️ News endpoint failed: {e}")
+    # ---- Update final status ----
+    if degraded:
+        state["api_status"] = "DEGRADED"
 
-    except Exception as e:
-        print(f"❌ Fatal news agent error: {e}")
-        state["api_status"] = "FAILED"
-
+    # ---- Atomic write ----
     tmp = FUNDAMENTAL_FILE + '.tmp'
     with open(tmp, 'w') as f:
         json.dump(state, f, indent=4)
@@ -174,6 +193,7 @@ def is_vetoed(asset, state):
 
 def risk_multiplier(state):
     if not state: return 1.0
+    # If API is degraded, stay cautious but don't block: full risk unless explicitly vetoed.
     score = state.get("sentiment_score", 0.0)
     if score < -0.6: return 0.0
     if score < -0.3: return 0.5
