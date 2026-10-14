@@ -108,7 +108,7 @@ def fetch_fundamentals():
                 data = r1.json()
                 state["sentiment_score"] = float(data.get("score", 0.0))
                 state["sentiment_label"] = data.get("label", "Neutral")
-            except Exception as e:
+        except Exception as e:
             print(f"  ⚠️ Sentiment endpoint failed: {e}")
             state["api_status"] = "DEGRADED"
 
