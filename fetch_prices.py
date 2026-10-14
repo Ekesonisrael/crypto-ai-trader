@@ -267,13 +267,20 @@ def main():
             existing_ids.add(signal_id)
 
             emoji = "📈" if signal == "LONG" else "📉"
+                        news_label = news_state.get('sentiment_label', 'N/A') if news_state else 'N/A'
+            news_score = news_state.get('sentiment_score', 0.0) if news_state else 0.0
+            mult_label = f" ({news_mult*100:.0f}% size)" if news_mult < 1.0 else ""
+
             message = (
                 f"🚨 *{STRATEGY_VERSION}* 🚨\n\n"
                 f"{emoji} *{signal}* {symbol}\n\n"
                 f"Entry: `${entry_price:.4f}`\nStop: `${stop_loss:.4f}`\nTarget: `${take_profit:.4f}`\n\n"
-                f"Size: `{position_size:.6f}`\nRisk: `${risk_amount:.2f}` ({allowed_risk*100:.2f}%)\nR:R: `1:2`\n\n"
-                f"🧠 {reason}\n🕐 {signal_time_str} UTC"
+                f"Size: `{position_size:.6f}`\nRisk: `${risk_amount:.2f}` ({effective_risk*100:.2f}%{mult_label})\nR:R: `1:2`\n\n"
+                f"🧠 {reason}\n"
+                f"📰 News: {news_label} ({news_score:+.2f})\n"
+                f"🕐 {signal_time_str} UTC"
             )
+                   
             send_telegram(message)
             cooldowns[symbol] = now
             print(f"  ✅ Alert sent.")
