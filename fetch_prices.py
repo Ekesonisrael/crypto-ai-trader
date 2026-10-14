@@ -149,7 +149,7 @@ def main():
             signal = "WAIT"; reason = "No setup."
 
             if daily_bias == "LONG" and four_h_bias == "SHORT":
-                if four_h['RSI'] < 80 and one_h['RSI'] > 40:
+                if four_h['RSI'] < 35 and one_h['RSI'] > 40:
                     signal = "LONG"; reason = "Daily Bullish. 4H Oversold. 1H Recovering."
                 else:
                     reason = f"Daily Bullish. 4H pullback not ready (RSI={four_h['RSI']:.1f})."
