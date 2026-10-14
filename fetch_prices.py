@@ -6,6 +6,7 @@ import os
 import requests
 import json
 from datetime import datetime
+import news_agent
 
 # ==========================================
 # TELEGRAM SETTINGS
@@ -78,8 +79,12 @@ def analyze_timeframe(symbol, timeframe, limit=100, retries=3):
             if i == retries - 1: raise e
             time.sleep(2)
 
-print(f"Chief Agent: Scanning 6 Assets...")
+print(f"Chief Agent: Scanning 6 Assets with Fundamental Filter...")
 print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+# Fetch News Impact Once
+news_status, news_reason = news_agent.check_news_impact()
+print(f"📰 Fundamental Status: {news_status} | {news_reason}\n")
 
 for symbol in SYMBOLS:
     try:
@@ -92,10 +97,10 @@ for symbol in SYMBOLS:
         daily_bias = "LONG" if daily['EMA_20'] > daily['EMA_50'] else "SHORT"
         four_h_bias = "LONG" if four_h['EMA_20'] > four_h['EMA_50'] else "SHORT"
 
-        # --- NEW DEEP PULLBACK LOGIC ---
         signal = "WAIT"
         reason = "Higher timeframes do not agree."
 
+        # --- DEEP PULLBACK LOGIC ---
         if daily_bias == "LONG" and four_h_bias == "SHORT":
             if four_h['RSI'] < 35:
                 if one_h['RSI'] > 40:
@@ -134,7 +139,18 @@ for symbol in SYMBOLS:
 
         print(f"   Daily Bias: {daily_bias} | 4H Bias: {four_h_bias}")
         print(f"   1H RSI: {one_h['RSI']:.2f} | 4H RSI: {four_h['RSI']:.2f}")
-        print(f"   *** SIGNAL: {signal} *** | Reason: {reason}")
+        print(f"   *** TECHNICAL SIGNAL: {signal} *** | Reason: {reason}")
+
+        # --- FUNDAMENTAL FILTER (THE VETO) ---
+        if signal != "WAIT":
+            if news_status == "VETO":
+                print(f"   ❌ TRADE BLOCKED BY NEWS AGENT: {news_reason}")
+                signal = "WAIT"
+                reason = f"Technical setup found, but blocked by news: {news_reason}"
+            elif (signal == "LONG" and news_status == "BEARISH") or (signal == "SHORT" and news_status == "BULLISH"):
+                print(f"   ⚠️ TRADE WARNING: Technical signal conflicts with news sentiment.")
+                # We could reduce risk here, but for now, let's just log it and proceed
+                reason += f" (Caution: News is {news_status})"
 
         if signal != "WAIT":
             current_time = datetime.now()
