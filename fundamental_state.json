@@ -1,12 +1,58 @@
 {
-    "timestamp": "2026-10-14 17:00:38",
+    "timestamp": "2026-10-14 18:01:00",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
+            "title": "Standard Chartered Opens Bitcoin and Ethereum Trading to Wealthy UAE Clients",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC",
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "OpenAI\u2019s Sachin Katti to leave infrastructure role, stay on as advisor",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
             "title": "Bank of America shares drop 8% after third-quarter revenue miss and regulatory penalty",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
+            "score": -0.6,
+            "reason": "FED + HIKE (bearish)",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u2018You\u2019re committing crime in broad daylight\u2019: Kalshi CEO defends prediction markets amid insider trading concerns",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -24,16 +70,16 @@
             "url": ""
         },
         {
-            "title": "Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
-            "score": -0.6,
-            "reason": "FED + HIKE (bearish)",
+            "title": "Ethereum\u2019s quantum race takes a new turn as zkSync courts banks and Starknet weighs exit",
+            "score": 0.0,
+            "reason": "no pattern match",
             "affected_assets": [
-                "BTC"
+                "ETH"
             ],
             "url": ""
         },
         {
-            "title": "Morgan Stanley tops estimates as equities trading revenue beats expectations by $909 million",
+            "title": "OCC report finds debanking efforts tied to crypto activities",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -42,56 +88,11 @@
             "url": ""
         },
         {
-            "title": "Standard Chartered pushes $2 trillion stablecoin market forecast to 2030 as supply growth stalls",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Strive\u2019s new $500 million Bitcoin financing plan comes with a $257 million annual dividend problem",
+            "title": "Bitmex Faces $26 Million Claim Over 1,053 Losing Bitcoin Trades",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Standard Chartered pushes $2T stablecoin forecast to 2030 as transaction volumes grow",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Hacker Pulls $86,000 in Locked Tokens From a Shared Crypto Vault",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin Fog operator\u2019s conviction upheld without Chainalysis disclosing source code",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "HEX founder Richard Heart arrested with \u2018electronic devices\u2019 in Istanbul via Interpol warrant",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
             ],
             "url": ""
         }
@@ -99,7 +100,7 @@
     "per_asset_vetoes": {
         "BTC": {
             "reason": "FED + HIKE (bearish): Bitcoin falls below $82,000 as hotter core CPI revives Fed hike concerns",
-            "expires": "2026-10-14 23:00:58"
+            "expires": "2026-10-15 00:01:14"
         }
     }
 }
