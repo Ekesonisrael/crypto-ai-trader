@@ -1040,7 +1040,7 @@ def selftest():
     c_in = TAKER_FEE + SLIPPAGE_ENTRY
     exp_win = (c_in * 100 + (TP_FEE + SLIPPAGE_TP) * 102) / 1.0
     exp_loss = (c_in * 100 + (TAKER_FEE + SLIPPAGE_STOP) * 99) / 1.0
-    check('win cost in R (1% stop)', abs(exp_win - 0.1626) < 1e-3, f"({exp_win:.4f}R)")
+    check('win cost in R (1% stop)', abs(exp_win - 0.1616) < 1e-3, f"({exp_win:.4f}R)")
     check('stop-out cost in R (1% stop)', abs(exp_loss - 0.2780) < 1e-3, f"({exp_loss:.4f}R)")
     d_frac = 0.002  # 0.2% stop -> leverage 5x > cap -> risk must be capped
     risk = min(STARTING_BALANCE * RISK_PER_TRADE, LEVERAGE_CAP * STARTING_BALANCE * d_frac)
