@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: 'Command to run (default: selftest)'
-        required: false
+        description: 'Which run?'
+        required: true
         default: 'selftest'
         type: choice
         options:
@@ -22,42 +22,44 @@ jobs:
     timeout-minutes: 45
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install deps
         run: pip install numpy pandas requests
 
-      - name: Run selftest
-        if: ${{ inputs.command == 'selftest' }}
+      - name: Selftest
+        if: inputs.command == 'selftest'
         run: python backtest_v3.py --selftest
 
-      - name: Run short backtest (90 days, BTC+ETH)
-        if: ${{ inputs.command == 'short' }}
+      - name: Short run
+        if: inputs.command == 'short'
         run: python backtest_v3.py --days 90 --symbols BTC ETH --no-cache
 
-      - name: Run full backtest (730 days, all symbols)
-        if: ${{ inputs.command == 'full' }}
+      - name: Full run
+        if: inputs.command == 'full'
         run: python backtest_v3.py --days 730
 
-      - - name: Commit report
-  if: ${{ inputs.command != 'selftest' }}
-  run: |
-    git config --local user.email "action@github.com"
-    git config --local user.name "GitHub Action"
-    git add -A
-    git diff --quiet && git diff --staged --quiet || git commit -m "backtest: run [skip ci]"
-    git pull --rebase origin main || true
-    git push || true
+      - name: Commit results
+        if: inputs.command != 'selftest'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "backtest run [skip ci]"
+          git pull --rebase origin main || true
+          git push || true
 
       - name: Upload artifacts
-        if: ${{ inputs.command != 'selftest' }}
+        if: inputs.command != 'selftest'
         uses: actions/upload-artifact@v4
         with:
           name: backtest-results
