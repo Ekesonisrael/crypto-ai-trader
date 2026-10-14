@@ -539,9 +539,12 @@ def select_trades(sd, max_cost_r=None):
         if st == S_OPEN:
             skipped_open += 1
             continue
-        if max_cost_r is not None and sd.est_cost_r(i) > max_cost_r:
-            skipped_cost += 1
-            continue
+        if sd.est_cost_r(i) is not None and sd.out[side]['d_frac'][i] * 100 < MIN_STOP_PCT:
+    skipped_cost += 1
+    continue
+ if max_cost_r is not None and sd.est_cost_r(i) > max_cost_r:
+    skipped_cost += 1
+    continue
         xi = int(out['exit_idx'][i])
         e = i + 1
         sl = out['entry_px'][i] - side * out['dist'][i]
