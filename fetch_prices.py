@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 # ==========================================
 # CONFIG
 # ==========================================
-STRATEGY_VERSION = "swing-v3.0-phase2"
+STRATEGY_VERSION = "swing-v3.0-phase3" # UPDATED
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 HEALTHCHECK_URL = os.getenv("HEALTHCHECK_URL")
@@ -19,11 +19,11 @@ JOURNAL_FILE = 'trade_journal.csv'
 COOLDOWN_FILE = 'cooldown_tracker.json'
 
 ACCOUNT_BALANCE = 10000.0
-BASE_RISK_PERCENT = 0.01     # 1% base risk
-MAX_PORTFOLIO_RISK = 0.02    # 2% max total risk
+BASE_RISK_PERCENT = 0.01
+MAX_PORTFOLIO_RISK = 0.02
 MAX_POSITIONS_PER_DIRECTION = 2
-DAILY_LOSS_LIMIT_R = -3.0    # Stop trading if we lose 3R in a day
-MAX_DRAWDOWN_PERCENT = 0.15  # 15% hard kill switch
+DAILY_LOSS_LIMIT_R = -3.0
+MAX_DRAWDOWN_PERCENT = 0.15
 
 COOLDOWN_SECONDS = 3600
 SYMBOLS = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'SOL/USDT:USDT',
@@ -78,25 +78,42 @@ def analyze_timeframe(symbol, timeframe, limit=100, retries=3):
             df = df.iloc[:-1].reset_index(drop=True) # Drop forming candle
             if df[['open','high','low','close']].isnull().any().any(): raise ValueError("NaN")
 
+            # RSI
             delta = df['close'].diff()
             gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
             loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
             rs = gain / loss
             df['RSI'] = 100 - (100 / (1 + rs))
+
+            # EMAs
             df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
             df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
-            df['Recent_High'] = df['high'].rolling(window=20).max()
-            df['Recent_Low'] = df['low'].rolling(window=20).min()
-            
+
+            # ATR (14 period)
+            high_low = df['high'] - df['low']
+            high_close = (df['high'] - df['close'].shift()).abs()
+            low_close = (df['low'] - df['close'].shift()).abs()
+            tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+            df['ATR'] = tr.rolling(window=14).mean()
+
+            # ADX (14 period)
+            df['TR'] = tr
+            df['+DM'] = ((df['high'] - df['high'].shift()) > (df['low'].shift() - df['low'])) * (df['high'] - df['high'].shift())
+            df['-DM'] = ((df['low'].shift() - df['low']) > (df['high'] - df['high'].shift())) * (df['low'].shift() - df['low'])
+            df['+DI'] = 100 * (df['+DM'].rolling(window=14).mean() / df['TR'].rolling(window=14).mean())
+            df['-DI'] = 100 * (df['-DM'].rolling(window=14).mean() / df['TR'].rolling(window=14).mean())
+            dx = (abs(df['+DI'] - df['-DI']) / (df['+DI'] + df['-DI'])) * 100
+            df['ADX'] = dx.rolling(window=14).mean()
+
             last = df.iloc[-1]
-            if pd.isna(last['RSI']): raise ValueError("NaN")
+            if pd.isna(last['RSI']) or pd.isna(last['ADX']): raise ValueError("Indicator NaN")
             return last
         except Exception as e:
             if attempt == retries - 1: raise e
             time.sleep(2)
 
 # ==========================================
-# RISK ENGINE (PHASE 2)
+# RISK ENGINE
 # ==========================================
 def load_journal():
     if not os.path.isfile(JOURNAL_FILE): return pd.DataFrame()
@@ -104,45 +121,27 @@ def load_journal():
     except: return pd.DataFrame()
 
 def check_risk_limits(df):
-    """Returns (allowed_risk_percent, reason)"""
-    if df.empty:
-        return BASE_RISK_PERCENT, "No open trades. Full risk allowed."
-
-    # 1. Hard Drawdown Kill Switch
+    if df.empty: return BASE_RISK_PERCENT, "No open trades."
     closed = df[df['Status'].isin(['WIN','LOSS','TIME_STOP'])].copy()
     if not closed.empty:
         closed['R_Multiple'] = pd.to_numeric(closed['R_Multiple'], errors='coerce').fillna(0)
         total_r = closed['R_Multiple'].sum()
-        # Assume 1R = 1% of account. 15% drawdown = -15R
-        if total_r <= -15:
-            return 0.0, "KILL SWITCH: 15% drawdown hit. Manual reset required."
+        if total_r <= -15: return 0.0, "KILL SWITCH: 15% drawdown hit."
 
-    # 2. Daily Loss Limit
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     today_trades = closed[closed['Close_Date'].astype(str).str.startswith(today)]
     if not today_trades.empty:
         today_r = today_trades['R_Multiple'].sum()
-        if today_r <= DAILY_LOSS_LIMIT_R:
-            return 0.0, f"DAILY LIMIT: Lost {today_r:.1f}R today. Stopping."
+        if today_r <= DAILY_LOSS_LIMIT_R: return 0.0, f"DAILY LIMIT: {today_r:.1f}R today."
 
-    # 3. Portfolio Risk Cap
     pending = df[df['Status'] == 'PENDING']
     if not pending.empty:
-        total_risk_dollars = pending['Risk_Amount'].sum()
-        total_risk_pct = total_risk_dollars / ACCOUNT_BALANCE
+        total_risk_pct = pending['Risk_Amount'].sum() / ACCOUNT_BALANCE
         if total_risk_pct >= MAX_PORTFOLIO_RISK:
-            return 0.0, f"PORTFOLIO CAP: {total_risk_pct*100:.1f}% risk open (max {MAX_PORTFOLIO_RISK*100}%)."
-        
-        # 4. Direction Cap
-        longs = len(pending[pending['Direction'] == 'LONG'])
-        shorts = len(pending[pending['Direction'] == 'SHORT'])
-        
-        # 5. Dynamic Risk (Scale DOWN only)
+            return 0.0, f"PORTFOLIO CAP: {total_risk_pct*100:.1f}% open."
         if total_r < -5:
-            return 0.005, "Drawdown > 5R. Scaling risk down to 0.5%."
-        
-        return BASE_RISK_PERCENT, f"Open risk: {total_risk_pct*100:.1f}%. L/S: {longs}/{shorts}"
-
+            return 0.005, "Scaling risk down to 0.5% due to drawdown."
+        return BASE_RISK_PERCENT, f"Open risk: {total_risk_pct*100:.1f}%"
     return BASE_RISK_PERCENT, "No pending trades."
 
 # ==========================================
@@ -156,7 +155,6 @@ def main():
     cooldowns = load_cooldowns()
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    # Check Risk Engine before scanning
     allowed_risk, risk_reason = check_risk_limits(df)
     print(f"Risk Engine: {risk_reason}")
     if allowed_risk == 0.0:
@@ -178,59 +176,61 @@ def main():
 
             signal = "WAIT"; reason = "No setup."
 
-            # ORIGINAL STRICT LOGIC (Reverted)
-            if daily_bias == "LONG" and four_h_bias == "SHORT":
-                if four_h['RSI'] < 35 and one_h['RSI'] > 40:
-                    signal = "LONG"; reason = "Daily Bullish. 4H Oversold. 1H Recovering."
-                else:
-                    reason = f"Daily Bullish. 4H pullback not ready (RSI={four_h['RSI']:.1f})."
-            elif daily_bias == "SHORT" and four_h_bias == "LONG":
-                if four_h['RSI'] > 65 and one_h['RSI'] < 60:
-                    signal = "SHORT"; reason = "Daily Bearish. 4H Overbought. 1H Rolling Over."
-                else:
-                    reason = f"Daily Bearish. 4H rally not ready (RSI={four_h['RSI']:.1f})."
-            elif daily_bias == "LONG" and four_h_bias == "LONG":
-                if one_h['RSI'] < 45:
-                    signal = "LONG"; reason = "Daily/4H Bullish. 1H Pullback."
-                else:
-                    reason = "Daily/4H Bullish. Waiting 1H pullback (RSI<45)."
-            elif daily_bias == "SHORT" and four_h_bias == "SHORT":
-                if one_h['RSI'] > 55:
-                    signal = "SHORT"; reason = "Daily/4H Bearish. 1H Rally."
-                else:
-                    reason = "Daily/4H Bearish. Waiting 1H rally (RSI>55)."
+            # ⭐ PHASE 3 LOGIC: ADX Filter + Stricter RSI
+            adx = one_h['ADX']
 
-            print(f"  Daily={daily_bias} 4H={four_h_bias} | 4H RSI={four_h['RSI']:.1f} 1H RSI={one_h['RSI']:.1f}")
+            if adx < 20:
+                reason = f"ADX too low ({adx:.1f} < 20). Choppy market."
+            else:
+                if daily_bias == "LONG" and four_h_bias == "SHORT":
+                    if four_h['RSI'] < 35 and one_h['RSI'] > 50: # Stricter RSI
+                        signal = "LONG"; reason = f"Daily Bullish. 4H Oversold. 1H Recovered. ADX: {adx:.1f}"
+                    else:
+                        reason = f"Daily Bullish. 4H pullback not ready."
+                elif daily_bias == "SHORT" and four_h_bias == "LONG":
+                    if four_h['RSI'] > 65 and one_h['RSI'] < 50:
+                        signal = "SHORT"; reason = f"Daily Bearish. 4H Overbought. 1H Rolled. ADX: {adx:.1f}"
+                    else:
+                        reason = f"Daily Bearish. 4H rally not ready."
+                elif daily_bias == "LONG" and four_h_bias == "LONG":
+                    if one_h['RSI'] < 45 and one_h['close'] > one_h['EMA_50']: # Price above EMA
+                        signal = "LONG"; reason = f"Daily/4H Bullish. 1H Pullback confirmed. ADX: {adx:.1f}"
+                    else:
+                        reason = "Daily/4H Bullish. Waiting 1H pullback (RSI<45)."
+                elif daily_bias == "SHORT" and four_h_bias == "SHORT":
+                    if one_h['RSI'] > 55 and one_h['close'] < one_h['EMA_50']:
+                        signal = "SHORT"; reason = f"Daily/4H Bearish. 1H Rally confirmed. ADX: {adx:.1f}"
+                    else:
+                        reason = "Daily/4H Bearish. Waiting 1H rally (RSI>55)."
 
-            # RISK ENGINE CHECKS (Direction Cap)
-            if signal != "WAIT" and not df.empty:
+            print(f"  Daily={daily_bias} 4H={four_h_bias} | 4H RSI={four_h['RSI']:.1f} 1H RSI={one_h['RSI']:.1f} ADX={adx:.1f}")
+
+            if signal == "WAIT": continue
+
+            # Risk Engine Checks
+            if not df.empty:
                 pending = df[df['Status'] == 'PENDING']
-                if signal == "LONG" and len(pending[pending['Direction'] == 'LONG']) >= MAX_POSITIONS_PER_DIRECTION:
-                    print(f"  Risk Engine: Max {MAX_POSITIONS_PER_DIRECTION} LONG positions reached. Skipping.")
-                    continue
-                if signal == "SHORT" and len(pending[pending['Direction'] == 'SHORT']) >= MAX_POSITIONS_PER_DIRECTION:
-                    print(f"  Risk Engine: Max {MAX_POSITIONS_PER_DIRECTION} SHORT positions reached. Skipping.")
-                    continue
+                if signal == "LONG" and len(pending[pending['Direction'] == 'LONG']) >= MAX_POSITIONS_PER_DIRECTION: continue
+                if signal == "SHORT" and len(pending[pending['Direction'] == 'SHORT']) >= MAX_POSITIONS_PER_DIRECTION: continue
 
             # Cooldown
             last_signal = cooldowns.get(symbol)
-            if last_signal and (now - last_signal).total_seconds() < COOLDOWN_SECONDS:
-                print(f"  Cooldown active. Skip."); continue
-
-            if signal == "WAIT": continue
+            if last_signal and (now - last_signal).total_seconds() < COOLDOWN_SECONDS: continue
 
             candle_close = one_h['timestamp'].strftime("%Y%m%d%H%M")
             signal_id = f"{symbol.replace('/','_')}_{signal}_{candle_close}_{STRATEGY_VERSION}"
             if signal_id in existing_ids: continue
 
-            # Position Sizing with ALLOWED RISK
+            # ⭐ PHASE 3: ATR-BASED STOPS
             entry_price = one_h['close']
+            atr = one_h['ATR']
+
             if signal == "LONG":
-                stop_loss = one_h['Recent_Low']
+                stop_loss = entry_price - (1.5 * atr) # 1.5 ATR stop
                 risk_per_unit = entry_price - stop_loss
                 take_profit = entry_price + (risk_per_unit * 2)
             else:
-                stop_loss = one_h['Recent_High']
+                stop_loss = entry_price + (1.5 * atr)
                 risk_per_unit = stop_loss - entry_price
                 take_profit = entry_price - (risk_per_unit * 2)
 
@@ -240,7 +240,7 @@ def main():
             position_size = risk_amount / risk_per_unit
             signal_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-            # Log BEFORE alert
+            # Log before alert
             file_exists = os.path.isfile(JOURNAL_FILE)
             with open(JOURNAL_FILE, mode='a', newline='') as f:
                 writer = csv.writer(f)
