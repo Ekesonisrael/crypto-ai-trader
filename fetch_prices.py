@@ -153,6 +153,17 @@ def main():
     print(f"Scan (UTC): {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
 
     df = load_journal()
+               # Load latest news state (written by news_agent.py on previous run)
+    news_state = None
+    if os.path.isfile('fundamental_state.json'):
+        try:
+            with open('fundamental_state.json', 'r') as f:
+                news_state = json.load(f)
+            print(f"📰 News loaded. Sentiment: {news_state.get('sentiment_label', 'N/A')}, "
+                  f"Vetoes: {len(news_state.get('per_asset_vetoes', {}))}")
+        except Exception as e:
+            print(f"⚠️ Could not load news state: {e}")
+                   
     cooldowns = load_cooldowns()
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
