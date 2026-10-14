@@ -34,8 +34,7 @@ import pandas as pd
 # =============================================================================
 # CONFIG
 # =============================================================================
-SYMBOLS = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'SOL/USDT:USDT',
-           'BNB/USDT:USDT', 'XRP/USDT:USDT', 'DOGE/USDT:USDT']
+SYMBOLS = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'XRP/USDT:USDT', 'DOGE/USDT:USDT']
 BACKTEST_DAYS = 730
 
 # --- Strategy parameters (identical to your v2 file) ---
