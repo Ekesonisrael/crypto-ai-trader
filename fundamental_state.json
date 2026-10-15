@@ -1,16 +1,79 @@
 {
-    "timestamp": "2026-10-15 04:00:37",
+    "timestamp": "2026-10-15 05:01:01",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
+            "title": "Bitcoin drops below $81,000 as risk-off sentiment weighs on Asian equities",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
             "title": "Bitcoin miners plunge up to 13% in Wall Street\u2019s worst selloff since July",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "UPBIT \u4e0a\u7ebf Puffer (PUFFER) \u5e76\u652f\u6301 KRW \u4ea4\u6613",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u64ad\u5ba2\u7b14\u8bb0\uff5c\u5bf9\u8bdd\u5b59\u5b87\u6668\uff1a\u6781\u81f4\u7684\u5b64\u72ec\uff0c\u4e5f\u662f\u4e00\u79cd\u81ea\u7531",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 766,546 txs today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "ETHUSDT: Bearish Breakdown Toward 2,220 Liquidity",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Standard Chartered delays $2T stablecoin forecast to 2030 as supply stalls",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Peter Schiff Says Most Stocks Are in Bear Market as AI Leaders Carry the Index",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         },
@@ -24,70 +87,7 @@
             "url": ""
         },
         {
-            "title": "\u67d0\u5de8\u9cb8 3.52 \u4ebf\u7f8e\u5143\u591a\u5355\u9762\u4e34\u6e05\u7b97\u98ce\u9669\uff0c\u73b0\u6d6e\u4e8f\u7ea6 1887 \u4e07\u7f8e\u5143",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.112142294 | \ud83d\udeb6 0.112157699 | \ud83d\ude80 0.113142294 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 752,620 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Analyst Sees Bitcoin Beyond $175K as Market Structure Shifts",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Patrick Witt exits White House crypto council with no replacement named",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Tether \u66fe\u5411\u524d\u767d\u5bab\u52a0\u5bc6\u987e\u95ee\u5173\u8054\u516c\u53f8\u652f\u4ed8\u8d85 600 \u4e07\u7f8e\u5143",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Papertrade \u8fd1 7 \u65e5\u6536\u5165\u8fbe 3631 \u4e07\u7f8e\u5143",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u9ebb\u5409\u5927\u54e5\u906d\u6e05\u7b97\u540e\u518d\u5f00\u4ee5\u592a\u574a\u591a\u5355\uff0c\u6301\u6709 290 \u679a ETH",
+            "title": "Tether paid millions to Bo Hines\u2019 firm while he worked at the White House",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
