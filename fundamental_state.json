@@ -1,12 +1,39 @@
 {
-    "timestamp": "2026-10-15 03:00:35",
+    "timestamp": "2026-10-15 04:00:37",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "VanEck seeks to withdraw application for Lido staked Ether ETF",
+            "title": "Bitcoin miners plunge up to 13% in Wall Street\u2019s worst selloff since July",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u67d0\u5927\u7a7a\u5934\u4ea4\u6613\u5458\u7d2f\u8ba1\u83b7\u5229 640 \u4e07\u7f8e\u5143\uff0c\u4ecd\u6301\u591a\u6807\u7684\u7a7a\u5355",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u67d0\u5de8\u9cb8 3.52 \u4ebf\u7f8e\u5143\u591a\u5355\u9762\u4e34\u6e05\u7b97\u98ce\u9669\uff0c\u73b0\u6d6e\u4e8f\u7ea6 1887 \u4e07\u7f8e\u5143",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.112142294 | \ud83d\udeb6 0.112157699 | \ud83d\ude80 0.113142294 Gwei",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -15,11 +42,38 @@
             "url": ""
         },
         {
-            "title": "Firelight forces XRP-linked tokens lockup as withdrawal delay queue grows",
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 752,620 txs today",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "XRP"
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Analyst Sees Bitcoin Beyond $175K as Market Structure Shifts",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Patrick Witt exits White House crypto council with no replacement named",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Tether \u66fe\u5411\u524d\u767d\u5bab\u52a0\u5bc6\u987e\u95ee\u5173\u8054\u516c\u53f8\u652f\u4ed8\u8d85 600 \u4e07\u7f8e\u5143",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
             ],
             "url": ""
         },
@@ -33,65 +87,11 @@
             "url": ""
         },
         {
-            "title": "VanEck \u64a4\u56de\u9996\u6a94 stETH ETF\uff01ETF \u80fd\u539f\u751f\u8cea\u62bc\u5f8c\uff0cLido \u7684\u83ef\u723e\u8857\u9580\u7968\u6c92\u4e86",
+            "title": "\u9ebb\u5409\u5927\u54e5\u906d\u6e05\u7b97\u540e\u518d\u5f00\u4ee5\u592a\u574a\u591a\u5355\uff0c\u6301\u6709 290 \u679a ETH",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Algorand \u57fa\u91d1\u4f1a CSMO \u8f9e\u804c\uff0cCTO \u4e0e\u524d CEO \u5df2\u79bb\u4efb",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.39055539 | \ud83d\udeb6 0.390649377 | \ud83d\ude80 0.498587459 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin falls below $81K, triggering $485M in liquidations",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 743,606 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "BNY completes first tokenized Treasury repo on major triparty platform",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "No arrests as Brooklyn DA claws back about $300,000 from crypto scam ring",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
             ],
             "url": ""
         }
