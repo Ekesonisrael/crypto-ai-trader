@@ -1,12 +1,12 @@
 {
-    "timestamp": "2026-10-15 09:00:41",
+    "timestamp": "2026-10-15 10:01:05",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "9 mega banks block crypto accounts, but new OCC rules bite back",
+            "title": "Thailand crypto ETFs may see slow start despite new rules: CoinShares",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -15,7 +15,16 @@
             "url": ""
         },
         {
-            "title": "Bitcoin Sinks Toward $80,000 After Hot CPI. Will Whales Keep What They Added?",
+            "title": "Why Isn\u2019t XRP Rising? 13 Weeks of ETF Inflows Haven\u2019t Moved the Price",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Babylon advances native Bitcoin lending proposal on Aave V4",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -24,7 +33,7 @@
             "url": ""
         },
         {
-            "title": "EVEDEX Releases $EVE Tokenomics: 100M Fixed Supply, Non-Transferable Staking and a Retroactive Airdrop for Early Users",
+            "title": "Arthur Hayes Is Betting on What Comes After the AI Crash",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -33,53 +42,7 @@
             "url": ""
         },
         {
-            "title": "Bitcoin ETFs shed $261M as XRP funds buck weekly outflow trend",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC",
-                "XRP"
-            ],
-            "url": ""
-        },
-        {
-            "title": "BTCUSD Bearish Momentum Builds as Bitcoin Tests Critical Support",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Satoshi Frame | BTC analysis D12",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "BTCUS Bearish Market Structure, Order Block & Liquidity Targets",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "XRP price prediction 2026-2032: Will XRP reach $5?",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "XRP"
-            ],
-            "url": ""
-        },
-        {
-            "title": "ETHUSD Bearish Breakdown & Potential Recovery Setup Support Zone",
+            "title": "Ethereum goes through biggest liquidation event in six months with $242M in 24 hours",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -88,7 +51,43 @@
             "url": ""
         },
         {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.068841472 | \ud83d\udeb6 0.068941472 | \ud83d\ude80 0.075835619 Gwei",
+            "title": "Codex\u8ca0\u8cac\u4ebaTibo\u300c28 \u5929\u6311\u6230\u300d\u5df2\u7d93\u904e 10 \u5929\uff01\u6c7a\u5b9a\u7b2c\u4e09\u6b21\u91cd\u7f6etoken",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u6211\u5011\u90fd\u662f\u4e2d\u672c\u8070\u300b\u6982\u5ff5\u96d5\u50cf\u9032\u99d0\u7dad\u4e5f\u7d0d",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Chainalysis Report Shows AI Agents Completing 138 Million Crypto Payments",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Blockworks\uff1a\u4e03\u5bb6\u52a0\u5bc6\u63a8\u7406\u5546\u65e5\u5747\u5904\u7406\u7ea6 2110 \u4ebf Token",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u6570\u636e\uff1aVitalik \u7684\u94fe\u4e0a\u8d44\u4ea7\u603b\u4ef7\u503c\u7ea6 5.3 \u4ebf\u7f8e\u5143\uff0c\u5176\u4e2d 5.2781 \u4ebf\u7f8e\u5143\u4e3a ETH",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
