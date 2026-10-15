@@ -1,71 +1,12 @@
 {
-    "timestamp": "2026-10-15 00:00:29",
+    "timestamp": "2026-10-15 01:01:05",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Coins.ph users face app lockout as central bank intervenes",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.067940119 | \ud83d\udeb6 0.068040119 | \ud83d\ude80 0.068940119 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 803,842 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "SEC approves Cboe prediction market options tied to Coinbase, Nvidia, Tesla metrics",
-            "score": 0.8,
-            "reason": "SEC + APPROVE (bullish)",
-            "affected_assets": [
-                "BTC",
-                "ETH",
-                "SOL",
-                "BNB",
-                "XRP",
-                "DOGE"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Is Berkshire betting on its \"younger self\"? But this is actually a \"technology company\"!",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf BTC Fees: \u26a1 3 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Surging gasoline prices accounted for more than half of last month's jump in U.S. inflation",
+            "title": "Solana sets October 21 for massive Alpenglow upgrade that could make transactions 99% faster to finalize",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -74,7 +15,25 @@
             "url": ""
         },
         {
-            "title": "Bitcoin is primed for a super cycle.",
+            "title": "Irene Patrikios \u51fa\u4efb\u5168\u540c\u6001\u52a0\u5bc6\u516c\u53f8 Zama \u9996\u5e2d\u5546\u52a1\u5b98",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.06605663 | \ud83d\udeb6 0.066069559 | \ud83d\ude80 0.072681607 Gwei",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 783,524 txs today",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -83,7 +42,16 @@
             "url": ""
         },
         {
-            "title": "BTC  SELL SETUP  Short from $81'600",
+            "title": "$NIL \u2014 Bearish Harmonic Setup at a Key Reversal Zone",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf BTC Fees: \u26a1 1 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -92,7 +60,34 @@
             "url": ""
         },
         {
-            "title": "Brooklyn DA and FBI Crush Massive International Crypto Scam",
+            "title": "US Inflation Rises to 3.7% as Gasoline Surges, Putting an October Fed Hike in Play",
+            "score": -0.6,
+            "reason": "FED + HIKE (bearish)",
+            "affected_assets": [
+                "SOL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Sebi plans to ease many SME IPO rules, lower application amount",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Stocks in news: Reliance Industries, Jio Financial, Tata Tech, HDB Financial and Wipro",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Power prices top $1,000 on PJM as DoE issues emergency order to prevent blackouts",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -101,5 +96,10 @@
             "url": ""
         }
     ],
-    "per_asset_vetoes": {}
+    "per_asset_vetoes": {
+        "SOL": {
+            "reason": "FED + HIKE (bearish): US Inflation Rises to 3.7% as Gasoline Surges, Putting an October Fed Hike in Pl",
+            "expires": "2026-10-15 07:01:29"
+        }
+    }
 }
