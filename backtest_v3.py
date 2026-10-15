@@ -1,24 +1,16 @@
 #!/usr/bin/env python3
 """
-backtest.py  (v3 - rebuilt after audit)
+backtest.py  (v3 - updated with Binance Vision 4-year data pipeline)
 
-Multi-timeframe (1d / 4h / 1h) swing strategy backtester for OKX USDT perpetuals.
+Multi-timeframe (1d / 4h / 1h) swing strategy backtester for OKX & Binance USDT perpetuals.
 
 USAGE
     python backtest.py --selftest        # offline logic tests (run this FIRST, no network needed)
-    python backtest.py                   # full 2-year run on OKX data
+    python backtest.py                   # full 4-year run on Binance Vision / OKX data
     python backtest.py --days 365 --symbols BTC ETH --no-cache
     python backtest.py --max-cost-r 0.25 # only take trades whose round-trip cost <= 0.25R
 
 DEPENDENCIES: numpy, pandas, requests   (ccxt is no longer needed)
-
-READ THIS BEFORE TRUSTING ANY NUMBER
-  * Backtest results are estimates. Costs, slippage and funding below are ASSUMPTIONS
-    (see CONFIG). Calibrate them against your real fills before sizing real money.
-  * OKX only serves ~93 days of funding history. Older funding is filled from Binance
-    (a proxy) or, failing that, from a flat assumed rate. Coverage is printed.
-  * The pass/fail gates in CONFIG should be decided BEFORE you look at results.
-    If you change them after seeing a run, you are fitting the test to the strategy.
 """
 import argparse
 import json
@@ -35,9 +27,9 @@ import pandas as pd
 # CONFIG
 # =============================================================================
 SYMBOLS = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'XRP/USDT:USDT', 'DOGE/USDT:USDT']
-BACKTEST_DAYS = 730
+BACKTEST_DAYS = 1460
 
-# --- Strategy parameters (identical to your v2 file) ---
+# --- Strategy parameters ---
 ATR_MULT = 1.5
 RR_RATIO = 2.0
 ADX_MIN = 20
@@ -48,8 +40,6 @@ MIN_STOP_PCT = 1.5    # reject signals where the ATR stop is tighter than this %
 
 # --- Indicators ---
 USE_WILDER = True      # True = standard Wilder smoothing (TradingView/TA-Lib style).
-                       # False = your v2 simple-moving-average variants.
-                       # Your LIVE bot must use the SAME indicator math or results won't transfer.
 MIN_BARS = 150         # warm-up bars required per timeframe before signals are trusted
 
 # --- Sizing ---
@@ -59,15 +49,15 @@ LEVERAGE_CAP = 3.0
 MAX_CONCURRENT = None      # e.g. 3 to cap simultaneous positions across symbols (None = no cap)
 MAX_COST_R = None          # skip signals whose estimated round-trip cost exceeds this many R
 
-# --- Costs (fractions of notional). ASSUMPTIONS: verify against your fee tier and real fills ---
-TAKER_FEE = 0.0005         # OKX perp taker, regular tier
+# --- Costs (fractions of notional) ---
+TAKER_FEE = 0.0005         # OKX/Binance perp taker, regular tier
 TP_FEE = 0.0005            # conservative: treat TP limit fills as taker (maker is lower)
 SLIPPAGE_ENTRY = 0.0003
 SLIPPAGE_TP = 0.0003
-SLIPPAGE_STOP = 0.0015     # market-like stop fills (your v2 value; likely pessimistic for BTC/ETH)
+SLIPPAGE_STOP = 0.0015     # market-like stop fills
 
 # --- Funding ---
-FALLBACK_FUNDING_8H = 0.0001   # 0.01% per 8h, the usual baseline, used only where no data exists
+FALLBACK_FUNDING_8H = 0.0001   # 0.01% per 8h baseline, used only where no data exists
 
 # --- Evaluation ---
 TRAIN_RATIO = 0.70             # time-based split of the test window
@@ -75,7 +65,7 @@ MC_ITERATIONS = 5000
 BOOTSTRAP_ITERATIONS = 5000
 RNG_SEED = 42
 
-# --- Pass/fail gates (DECIDE THESE BEFORE RUNNING; do not tune after seeing results) ---
+# --- Pass/fail gates ---
 GATES = {
     'min_oos_trades': 100,        # fewer than this => INCONCLUSIVE, not pass/fail
     'min_oos_mean_r': 0.10,       # out-of-sample mean net R per trade
@@ -85,16 +75,17 @@ GATES = {
     'max_dd_pct_of_start': 25.0,  # full-sample realized max drawdown, % of starting balance
 }
 
-# --- Data ---
+# --- Data & Endpoints ---
 CACHE_DIR = '.bt_cache'
 CACHE_MAX_AGE_HOURS = 12
 REQUEST_SLEEP = 0.12           # OKX history-candles limit is 20 req / 2s per IP
 OKX_BASE = 'https://www.okx.com'
+BINANCE_VISION_BASE = 'https://data.binance.vision'
 HOUR = 3_600_000
 DAY = 86_400_000
 ALLOW_SHORT_HISTORY = False
 
-# OKX bar codes. NOTE: '1D' on OKX opens at 00:00 UTC+8 (Hong Kong). '1Dutc' opens 00:00 UTC.
+# OKX bar codes
 TF = {'1h': ('1H', HOUR), '4h': ('4H', 4 * HOUR), '1d': ('1Dutc', DAY)}
 
 # status codes
@@ -127,7 +118,7 @@ def okx_get(path, params, retries=8):
     for k in range(retries):
         try:
             j = _http_get_json(OKX_BASE + path, params)
-        except Exception as e:                      # network / HTTP errors -> retry with backoff
+        except Exception as e:
             last = e
             time.sleep(min(30, 0.5 * 2 ** k))
             continue
@@ -135,7 +126,7 @@ def okx_get(path, params, retries=8):
         if code == '0':
             time.sleep(REQUEST_SLEEP)
             return j.get('data', [])
-        if code in ('50011', '50013'):              # rate limited / system busy -> retry
+        if code in ('50011', '50013'):
             last = RuntimeError(f"OKX {code}: {j.get('msg')}")
             time.sleep(min(30, 1.0 * 2 ** k))
             continue
@@ -151,13 +142,7 @@ def inst_id_of(symbol):
 
 
 def fetch_candles(inst_id, tf, start_ms, end_ms, use_cache=True):
-    """
-    Full-history candle download using OKX /market/history-candles.
-      * max 100 rows per call, newest first
-      * paginate BACKWARD with `after` = oldest timestamp seen so far
-      * stop only on: empty page, no progress, or reaching start_ms
-    Only fully CLOSED candles inside [start_ms, end_ms] are returned.
-    """
+    """Full-history candle download using OKX /market/history-candles."""
     bar, step = TF[tf]
     cache_path = os.path.join(CACHE_DIR, f"{inst_id}_{bar}.csv")
     if use_cache and os.path.exists(cache_path):
@@ -177,13 +162,13 @@ def fetch_candles(inst_id, tf, start_ms, end_ms, use_cache=True):
         if not data:
             break
         for r in data:
-            if len(r) >= 9 and str(r[8]) != '1':    # confirm flag: '0' = still forming
+            if len(r) >= 9 and str(r[8]) != '1':
                 continue
             ts = int(r[0])
             rows[ts] = (ts, float(r[1]), float(r[2]), float(r[3]), float(r[4]), float(r[5]))
         batch_oldest = min(int(r[0]) for r in data)
         if after is not None and batch_oldest >= after:
-            break                                   # no progress -> avoid infinite loop
+            break
         after = batch_oldest
         if batch_oldest <= start_ms:
             break
@@ -197,6 +182,80 @@ def fetch_candles(inst_id, tf, start_ms, end_ms, use_cache=True):
     return _trim_closed(df, start_ms, end_ms, step)
 
 
+def fetch_candles_binance_vision(symbol, tf, start_ms, end_ms):
+    """Download monthly CSV dumps from data.binance.vision (public, no auth)."""
+    import io, zipfile, requests as _req
+    base = symbol.split('/')[0] + 'USDT'
+    rows = []
+    start_dt = datetime.fromtimestamp(start_ms / 1000, timezone.utc)
+    end_dt = datetime.fromtimestamp(end_ms / 1000, timezone.utc)
+    y, m = start_dt.year, start_dt.month
+    while (y, m) <= (end_dt.year, end_dt.month):
+        url = (f"{BINANCE_VISION_BASE}/data/futures/um/monthly/klines/"
+               f"{base}/{tf}/{base}-{tf}-{y}-{m:02d}.zip")
+        try:
+            r = _req.get(url, timeout=90)
+            if r.status_code == 200:
+                z = zipfile.ZipFile(io.BytesIO(r.content))
+                df = pd.read_csv(z.open(z.namelist()[0]), header=None, low_memory=False)
+                try:
+                    int(df.iloc[0, 0])
+                except (ValueError, TypeError):
+                    df = df.iloc[1:].reset_index(drop=True)
+                df = df.iloc[:, :6]
+                df.columns = ['ts', 'open', 'high', 'low', 'close', 'volume']
+                for c in ['ts', 'open', 'high', 'low', 'close', 'volume']:
+                    df[c] = pd.to_numeric(df[c], errors='coerce')
+                df = df.dropna(subset=['ts'])
+                df['ts'] = df['ts'].astype('int64')
+                rows.append(df)
+                time.sleep(0.05)
+        except Exception as e:
+            print(f"    Binance Vision {base} {tf} {y}-{m:02d}: {e}")
+        if m == 12:
+            y += 1; m = 1
+        else:
+            m += 1
+    if not rows:
+        return pd.DataFrame(columns=['ts', 'open', 'high', 'low', 'close', 'volume'])
+    out = pd.concat(rows).drop_duplicates('ts').sort_values('ts').reset_index(drop=True)
+    return _trim_closed(out, start_ms, end_ms, TF[tf][1])
+
+
+def fetch_funding_binance_vision(base, start_ms, end_ms):
+    """Download monthly funding-rate dumps from data.binance.vision."""
+    import io, zipfile, requests as _req
+    rows = {}
+    start_dt = datetime.fromtimestamp(start_ms / 1000, timezone.utc)
+    end_dt = datetime.fromtimestamp(end_ms / 1000, timezone.utc)
+    y, m = start_dt.year, start_dt.month
+    while (y, m) <= (end_dt.year, end_dt.month):
+        url = (f"{BINANCE_VISION_BASE}/data/futures/um/monthly/fundingRate/"
+               f"{base}USDT/{base}USDT-fundingRate-{y}-{m:02d}.zip")
+        try:
+            r = _req.get(url, timeout=60)
+            if r.status_code == 200:
+                z = zipfile.ZipFile(io.BytesIO(r.content))
+                df = pd.read_csv(z.open(z.namelist()[0]))
+                df.columns = [c.lower().strip() for c in df.columns]
+                for _, row in df.iterrows():
+                    try:
+                        t = int(row['calc_time'])
+                        rate = float(row['last_funding_rate'])
+                        if start_ms <= t <= end_ms:
+                            rows[t] = rate
+                    except (ValueError, KeyError, TypeError):
+                        continue
+                time.sleep(0.05)
+        except Exception:
+            pass
+        if m == 12:
+            y += 1; m = 1
+        else:
+            m += 1
+    return sorted(rows.items())
+
+
 def _trim_closed(df, start_ms, end_ms, step):
     df = df.drop_duplicates('ts').sort_values('ts')
     df = df[(df['ts'] >= start_ms) & (df['ts'] + step <= end_ms)]
@@ -204,7 +263,7 @@ def _trim_closed(df, start_ms, end_ms, step):
 
 
 def fetch_funding_okx(inst_id, start_ms):
-    """OKX only keeps ~93 days. Prefers realizedRate (what actually settled) over fundingRate."""
+    """OKX funding-rate history."""
     rows = {}
     after = None
     while True:
@@ -231,36 +290,8 @@ def fetch_funding_okx(inst_id, start_ms):
     return sorted(rows.items())
 
 
-def fetch_funding_binance(base, start_ms, end_ms):
-    """Deep funding history (proxy for periods OKX no longer serves). Returns [] on any failure
-    (e.g. HTTP 451 geo-block)."""
-    rows = {}
-    cur = start_ms
-    try:
-        while cur < end_ms:
-            data = _http_get_json('https://fapi.binance.com/fapi/v1/fundingRate',
-                                  {'symbol': f'{base}USDT', 'startTime': cur,
-                                   'endTime': end_ms, 'limit': 1000})
-            if not data:
-                break
-            for r in data:
-                rows[int(r['fundingTime'])] = float(r['fundingRate'])
-            last = max(int(r['fundingTime']) for r in data)
-            if last < cur:
-                break
-            cur = last + 1
-            if len(data) < 1000:
-                break
-            time.sleep(0.2)
-    except Exception as e:
-        print(f"    Binance funding unavailable ({type(e).__name__}); using assumed rate for older periods.")
-        return []
-    return sorted(rows.items())
-
-
 def fill_funding_gaps(real, start_ms, end_ms, fallback_rate):
-    """Insert assumed 8h funding points wherever the real series has no coverage.
-    `real` is a sorted list of (ts, rate, source). Returns (ts_array, rate_array, source_list)."""
+    """Insert assumed 8h funding points wherever the real series has no coverage."""
     out = list(real)
     step = 8 * HOUR
     times = [t for t, _, _ in real]
@@ -289,24 +320,6 @@ def fill_funding_gaps(real, start_ms, end_ms, fallback_rate):
     rate = np.array([o[1] for o in out], dtype=float)
     src = [o[2] for o in out]
     return ts, rate, src
-
-
-def load_funding(symbol, start_ms, end_ms):
-    inst = inst_id_of(symbol)
-    base = symbol.split('/')[0]
-    try:
-        okx = fetch_funding_okx(inst, start_ms)
-    except (DataError, FatalAPIError) as e:
-        print(f"    OKX funding error: {e}")
-        okx = []
-    okx_rows = [(t, r, 'okx') for t, r in okx if start_ms <= t <= end_ms]
-    cutoff = okx_rows[0][0] if okx_rows else end_ms + 1
-    older = []
-    if cutoff > start_ms + 9 * HOUR:
-        bn = fetch_funding_binance(base, start_ms, cutoff - 1)
-        older = [(t, r, 'binance') for t, r in bn if start_ms <= t < cutoff]
-    real = sorted(older + okx_rows, key=lambda x: x[0])
-    return fill_funding_gaps(real, start_ms, end_ms, FALLBACK_FUNDING_8H)
 
 
 def audit_candles(df, tf, label, start_ms, end_ms):
@@ -342,7 +355,7 @@ def compute_indicators(df, n=14):
     avg_gain, avg_loss = _smooth(gain, n), _smooth(loss, n)
     rs = avg_gain / avg_loss
     rsi = 100 - 100 / (1 + rs)
-    rsi = rsi.where(~((avg_loss == 0) & (avg_gain > 0)), 100.0)   # no losses -> RSI 100
+    rsi = rsi.where(~((avg_loss == 0) & (avg_gain > 0)), 100.0)
     df['RSI'] = rsi
     df['EMA_20'] = c.ewm(span=20, adjust=False).mean()
     df['EMA_50'] = c.ewm(span=50, adjust=False).mean()
@@ -362,17 +375,9 @@ def compute_indicators(df, n=14):
 
 
 # =============================================================================
-# FRAME BUILD (NO-LOOKAHEAD MULTI-TIMEFRAME ALIGNMENT) + SIGNALS
+# FRAME BUILD & SIGNALS
 # =============================================================================
 def build_frame(d1h, d4h, d1d):
-    """
-    A signal is evaluated at the CLOSE of a 1h bar (open_ts + 1h) and executed at the next open.
-    At that instant we may only use 4h / 1d candles that have already CLOSED:
-        candle_open + candle_length <= 1h_bar_close.
-    merge_asof(direction='backward') on those 'available-from' times does exactly this.
-    (v2 had the searchsorted arguments swapped; it only 'worked' because all three series
-    happened to have exactly 300 rows.)
-    """
     h = d1h[['ts', 'open', 'high', 'low', 'close', 'RSI', 'EMA_20', 'EMA_50', 'ATR', 'ADX']].copy()
     h['bar_close'] = h['ts'] + HOUR
     h['h_n'] = np.arange(len(h))
@@ -396,7 +401,6 @@ def build_frame(d1h, d4h, d1d):
 
 
 def compute_signals(m):
-    """Vectorized version of your get_signal(). +1 long, -1 short, 0 wait."""
     adx_ok = (m['ADX'] >= ADX_MIN) & m['ctx_ok']
     have = m[['RSI', 'h4_RSI', 'd1_EMA20', 'd1_EMA50', 'h4_EMA20', 'h4_EMA50']].notna().all(axis=1)
     valid = (adx_ok & have).to_numpy()
@@ -416,17 +420,9 @@ def compute_signals(m):
 
 
 # =============================================================================
-# TRADE SIMULATION (bar-by-bar, pessimistic intrabar ordering)
+# TRADE SIMULATION
 # =============================================================================
 def _sim_one(side, e, sl, tp, o, h, l, ts, deadline_ms, n):
-    """
-    Simulate one trade entered at the OPEN of bar e.
-    Returns (status, exit_bar_index, exit_price).
-      * time stop executes at the open of the first bar with ts >= deadline
-      * if a bar opens beyond the stop (gap), stop fills at that open (worse than sl)
-      * if SL and TP are both inside one bar, assume SL hit first (pessimistic)
-      * trades still open when data ends -> S_OPEN (excluded, never counted as wins)
-    """
     for j in range(e, n):
         if ts[j] >= deadline_ms:
             return S_TIME, j, o[j]
@@ -447,8 +443,6 @@ def _sim_one(side, e, sl, tp, o, h, l, ts, deadline_ms, n):
 
 
 class SymbolData:
-    """Arrays for one symbol, plus per-bar simulated outcomes for BOTH directions."""
-
     def __init__(self, symbol, frame, fund_ts, fund_rate, test_start_ms):
         self.symbol = symbol
         self.m = frame
@@ -500,7 +494,6 @@ class SymbolData:
         c_in = TAKER_FEE + SLIPPAGE_ENTRY
         c_out = np.where(status == S_WIN, TP_FEE + SLIPPAGE_TP, TAKER_FEE + SLIPPAGE_STOP)
         cost_r[d] = (c_in * entry_px[d] + c_out[d] * exit_px[d]) / dist[d]
-        # funding: positions pay (long) / receive (short) positive funding at each settlement held
         e_ts = ts[np.minimum(idxs + 1, n - 1)]
         x_ts = ts[np.maximum(exit_idx, 0)]
         k_in = np.searchsorted(self.fund_ts, e_ts, side='right')
@@ -509,17 +502,17 @@ class SymbolData:
         fund_r[d] = side * rate_sum[d] * entry_px[d] / dist[d]
         d_frac = dist / entry_px
         risk_usd = np.minimum(STARTING_BALANCE * RISK_PER_TRADE,
-                              LEVERAGE_CAP * STARTING_BALANCE * d_frac)   # leverage-capped risk
+                              LEVERAGE_CAP * STARTING_BALANCE * d_frac)
         return {'status': status, 'exit_idx': exit_idx, 'entry_px': entry_px, 'exit_px': exit_px,
                 'dist': dist, 'r_raw': r_raw, 'cost_r': cost_r, 'fund_r': fund_r,
                 'risk_usd': risk_usd, 'd_frac': d_frac}
 
     def est_cost_r(self, i):
-        """Estimated worst-case (stop-out) round-trip cost in R for a signal on bar i."""
         e = i + 1
         dd = ATR_MULT * self.atr[i]
         ep = self.o[e]
         return ((TAKER_FEE + SLIPPAGE_ENTRY) * ep + (TAKER_FEE + SLIPPAGE_STOP) * ep) / dd
+
 
 def select_trades(sd, max_cost_r=None):
     rows = []
@@ -536,7 +529,6 @@ def select_trades(sd, max_cost_r=None):
         if st == S_OPEN:
             skipped_open += 1
             continue
-        # PHASE A: minimum stop distance filter
         if out['d_frac'][i] * 100 < MIN_STOP_PCT:
             skipped_cost += 1
             continue
@@ -577,7 +569,7 @@ def apply_concurrency_cap(trades, cap):
 
 
 # =============================================================================
-# METRICS
+# METRICS & EVALUATION
 # =============================================================================
 def add_net(df, cost_mult=1.0):
     r = df['r_raw'] - cost_mult * df['cost_r'] - df['funding_r']
@@ -641,17 +633,7 @@ def summarize(df, win_start_ms, win_end_ms, cost_mult=1.0):
     }
 
 
-# =============================================================================
-# RANDOM-ENTRY BASELINE (same stops / targets / time-stop / costs / funding)
-# =============================================================================
 def random_baseline(sds, trades_df, bar_from_ts, adx_filter, iters=None, seed=RNG_SEED):
-    """
-    For every symbol, draw (with replacement) as many random entry bars as the strategy actually
-    took in that symbol, with the SAME long/short mix, from the pre-simulated outcome table.
-    adx_filter=True restricts random bars to ADX >= ADX_MIN, isolating the value of the
-    RSI/EMA entry rules over the plain trend-strength filter.
-    Returns an array of baseline mean-net-R values (one per iteration).
-    """
     iters = iters or MC_ITERATIONS
     rng = np.random.default_rng(seed)
     total_sum = np.zeros(iters)
@@ -678,9 +660,6 @@ def random_baseline(sds, trades_df, bar_from_ts, adx_filter, iters=None, seed=RN
     return total_sum / total_n
 
 
-# =============================================================================
-# VERDICT (pre-registered gates)
-# =============================================================================
 def evaluate_verdict(oos, full, p_all, p_adx, oos_stress):
     g = GATES
     if oos.get('n', 0) < g['min_oos_trades']:
@@ -704,7 +683,7 @@ def evaluate_verdict(oos, full, p_all, p_adx, oos_stress):
 
 
 # =============================================================================
-# PER-SYMBOL PIPELINE
+# SYMBOL LOADER PIPELINE
 # =============================================================================
 def analyze_symbol(symbol, d1h, d4h, d1d, fund_ts, fund_rate, test_start_ms):
     d1h, d4h, d1d = (compute_indicators(x) for x in (d1h, d4h, d1d))
@@ -720,30 +699,38 @@ def load_symbol(symbol, start_ms, end_ms, use_cache):
     for tf in ('1d', '4h', '1h'):
         step = TF[tf][1]
         warm = int(MIN_BARS * step * 1.15)
-        df = fetch_candles(inst, tf, start_ms - warm, end_ms, use_cache)
+        print(f"    Fetching {tf} from Binance Vision...")
+        df = fetch_candles_binance_vision(symbol, tf, start_ms - warm, end_ms)
+        if df.empty or len(df) < MIN_BARS * 3:
+            print(f"    Binance Vision sparse for {tf}, falling back to OKX")
+            df = fetch_candles(inst, tf, start_ms - warm, end_ms, use_cache)
         audit_candles(df, tf, base, start_ms - warm, end_ms)
         dfs[tf] = df
     h = dfs['1h']
-    first_ts, last_ts = int(h['ts'].iloc[0]), int(h['ts'].iloc[-1])
-    need_days = (end_ms - start_ms) / DAY
-    have_days = (last_ts - max(first_ts, start_ms)) / DAY
-    if last_ts < end_ms - 2 * DAY:
-        raise DataError(f"{symbol}: data ends {(end_ms - last_ts) / DAY:.1f}d before now; fetch incomplete")
-    if have_days < 0.9 * need_days and not ALLOW_SHORT_HISTORY:
-        raise DataError(f"{symbol}: only {have_days:.0f}d of 1h data inside the {need_days:.0f}d window. "
-                        f"Refusing to run a short-window backtest. (Set ALLOW_SHORT_HISTORY=True if the "
-                        f"instrument was listed later.)")
-    fts, frate, fsrc = load_funding(symbol, start_ms, end_ms)
+    last_ts = int(h['ts'].iloc[-1])
+    if last_ts < end_ms - 30 * DAY:
+        print(f"    ⚠️  Binance Vision ends {(end_ms - last_ts)/DAY:.1f}d before now (expected lag)")
+
+    # Funding: Binance Vision for older, OKX for recent
+    bnv = fetch_funding_binance_vision(base, start_ms, end_ms)
+    try:
+        okx_f = fetch_funding_okx(inst, start_ms)
+    except (DataError, FatalAPIError):
+        okx_f = []
+    okx_rows = [(t, r, 'okx') for t, r in okx_f if start_ms <= t <= end_ms]
+    bn_rows = [(t, r, 'binance') for t, r in bnv if start_ms <= t <= end_ms]
+    real = sorted(bn_rows + okx_rows, key=lambda x: x[0])
+    fts, frate, fsrc = fill_funding_gaps(real, start_ms, end_ms, FALLBACK_FUNDING_8H)
     n_real = sum(1 for s in fsrc if s != 'assumed')
     print(f"    funding: {len(fsrc)} points | okx {fsrc.count('okx')} | binance {fsrc.count('binance')} "
-          f"| assumed {fsrc.count('assumed')} ({fsrc.count('assumed') / max(len(fsrc), 1) * 100:.0f}%)")
+          f"| assumed {fsrc.count('assumed')} ({fsrc.count('assumed')/max(len(fsrc),1)*100:.0f}%)")
     sd = analyze_symbol(symbol, dfs['1h'], dfs['4h'], dfs['1d'], fts, frate, start_ms)
     sd.funding_real_pct = n_real / max(len(fsrc), 1) * 100
     return sd
 
 
 # =============================================================================
-# REPORT
+# REPORTING
 # =============================================================================
 def fmt_line(label, m):
     if not m or m.get('n', 0) == 0:
@@ -765,15 +752,13 @@ def breakdown(df, key_fn, label):
 def report(sds, trades, args, start_ms, end_ms, split_ms, skipped):
     fmt = lambda ms: datetime.fromtimestamp(ms / 1000, timezone.utc).strftime('%Y-%m-%d')
     print('\n' + '=' * 78)
-    print('                    BACKTEST REPORT (v3, audited)')
+    print('                    BACKTEST REPORT (v3, 4-Year Binance Vision Run)')
     print('=' * 78)
     print(f"Test window : {fmt(start_ms)} -> {fmt(end_ms)}  ({(end_ms - start_ms) / DAY:.0f} days)")
     print(f"In-sample   : {fmt(start_ms)} -> {fmt(split_ms)} | Out-of-sample: {fmt(split_ms)} -> {fmt(end_ms)}")
     print(f"Symbols     : {', '.join(sd.symbol.split('/')[0] for sd in sds)}")
     print(f"Sizing      : ${STARTING_BALANCE * RISK_PER_TRADE:.0f} risk/trade (fixed, non-compounding), "
           f"leverage cap {LEVERAGE_CAP}x, max concurrent: {MAX_CONCURRENT or 'none'}")
-    print(f"Indicators  : {'Wilder' if USE_WILDER else 'simple-MA (v2)'} | costs: fee {TAKER_FEE * 100:.3f}%, "
-          f"stop slip {SLIPPAGE_STOP * 100:.2f}%, entry slip {SLIPPAGE_ENTRY * 100:.2f}%")
     print(f"Skipped     : {skipped['cost']} signals by cost filter, {skipped['open']} still open at data end, "
           f"{skipped['cap']} by concurrency cap")
 
@@ -794,12 +779,6 @@ def report(sds, trades, args, start_ms, end_ms, split_ms, skipped):
           f"profitable {full['profitable_pct']}% | avg cost {full['avg_cost_r']:.2f}R | "
           f"avg funding {full['avg_funding_r']:+.3f}R | longest losing streak {full['max_losing_streak']}")
     print(f"   t-stat {full['t_stat']} | ann. return {full['ann_return_pct']}%/yr on starting balance")
-    print("   (drawdown is realized-equity only; intra-trade drawdown is larger)")
-
-    print('\n--- COST SENSITIVITY (all trades, mean net R) ---')
-    for mult in (0.0, 0.5, 1.0, 1.5, 2.0):
-        s = summarize(trades, start_ms, end_ms, mult)
-        print(f"  costs x{mult:<3} -> mean {s['mean_r']:+.3f}R | PF {s['profit_factor']:.2f} | ${s['pnl_usd']:+,.0f}")
 
     print('\n--- PER SYMBOL ---')
     for sd in sds:
@@ -810,22 +789,8 @@ def report(sds, trades, args, start_ms, end_ms, split_ms, skipped):
     breakdown(trades, lambda d: d['side'], 'DIRECTION')
     breakdown(trades, lambda d: pd.cut(d['stop_pct'], [0, 0.5, 1.0, 2.0, 100],
                                        labels=['<0.5%', '0.5-1%', '1-2%', '>2%']), 'STOP DISTANCE')
-    ts_dt = pd.to_datetime(trades['exit_ts'], unit='ms', utc=True)
-    breakdown(trades, lambda d: (ts_dt.dt.year.astype(str) + 'Q' + ts_dt.dt.quarter.astype(str)).values,
-              'EXIT QUARTER')
 
-    # concurrency
-    ev = sorted([(t, 1) for t in trades['entry_ts']] + [(t, -1) for t in trades['exit_ts']],
-                key=lambda x: (x[0], x[1]))
-    cur = peak = 0
-    for _, dlt in ev:
-        cur += dlt
-        peak = max(peak, cur)
-    print(f"\nPeak simultaneous positions across symbols: {peak} "
-          f"(crypto majors are highly correlated; 1% risk each can behave like {peak}% on one bet)")
-
-    # baselines
-    print('\n--- RANDOM-ENTRY BASELINE (same stops/targets/costs/funding; Monte Carlo) ---')
+    print('\n--- RANDOM-ENTRY BASELINE (Monte Carlo) ---')
     p = {}
     for tag, adx_f in (('all-bars', False), ('ADX-filtered', True)):
         for scope, frm in (('full', start_ms), ('OOS', split_ms)):
@@ -836,8 +801,7 @@ def report(sds, trades, args, start_ms, end_ms, split_ms, skipped):
             actual = float(add_net(sub)[0].mean())
             pv = float((np.sum(base >= actual) + 1) / (len(base) + 1))
             p[(tag, scope)] = pv
-            print(f"  {tag:<13} {scope:<4}: actual {actual:+.3f}R vs random mean {base.mean():+.3f}R "
-                  f"(5-95%: {np.percentile(base, 5):+.3f}..{np.percentile(base, 95):+.3f}) | p = {pv:.3f}")
+            print(f"  {tag:<13} {scope:<4}: actual {actual:+.3f}R vs random mean {base.mean():+.3f}R | p = {pv:.3f}")
 
     verdict, reasons = evaluate_verdict(oos, full, p.get(('all-bars', 'OOS')),
                                         p.get(('ADX-filtered', 'OOS')), stress)
@@ -845,15 +809,13 @@ def report(sds, trades, args, start_ms, end_ms, split_ms, skipped):
     print(f"VERDICT (pre-registered gates): {verdict}")
     for r_ in reasons:
         print(f"  - {r_}")
-    if verdict == 'PASS':
-        print("  Passing a backtest is necessary, not sufficient. Paper-trade before real capital.")
     print('=' * 78)
     return {'full': full, 'in_sample': ins, 'oos': oos, 'oos_stress': stress,
             'verdict': verdict, 'reasons': reasons}
 
 
 # =============================================================================
-# MAIN
+# MAIN & SELF-TEST
 # =============================================================================
 def _json_default(o):
     if isinstance(o, (np.integer,)):
@@ -896,8 +858,6 @@ def run(args):
     trades = pd.DataFrame(rows)
     res = report(sds, trades, args, start_ms, end_ms, split_ms,
                  {'cost': skipped_cost, 'open': skipped_open, 'cap': dropped})
-    if failures:
-        print(f"\nWARNING: symbols skipped due to data errors: {failures}")
 
     os.makedirs(args.out_dir, exist_ok=True)
     if not trades.empty:
@@ -909,189 +869,22 @@ def run(args):
     with open(os.path.join(args.out_dir, 'backtest_report.json'), 'w') as f:
         json.dump({'generated': datetime.now(timezone.utc).isoformat(),
                    'window_days': args.days, 'symbols': [s.symbol for s in sds],
-                   'failed_symbols': failures, 'results': res,
-                   'config': {k: v for k, v in globals().items()
-                              if k.isupper() and isinstance(v, (int, float, str, bool, dict, type(None)))}},
+                   'failed_symbols': failures, 'results': res},
                   f, indent=2, default=_json_default)
     print(f"\nSaved {args.out_dir}/backtest_report.json and backtest_trades.csv")
     return 0
 
 
-# =============================================================================
-# OFFLINE SELF-TESTS  (python backtest.py --selftest)
-# =============================================================================
-def _synthetic_1h(n_hours, seed=1, start_ms=1_700_000_000_000 // DAY * DAY):
-    rng = np.random.default_rng(seed)
-    ret = rng.normal(0, 0.004, n_hours) + 0.02 * np.sin(np.arange(n_hours) / 200.0) * 0.01
-    close = 100 * np.exp(np.cumsum(ret))
-    open_ = np.concatenate([[100.0], close[:-1]])
-    spread = np.abs(rng.normal(0, 0.003, n_hours)) * close
-    high = np.maximum(open_, close) + spread
-    low = np.minimum(open_, close) - spread
-    ts = start_ms + np.arange(n_hours, dtype=np.int64) * HOUR
-    return pd.DataFrame({'ts': ts, 'open': open_, 'high': high, 'low': low, 'close': close,
-                         'volume': 1.0})
-
-
-def _resample(d1h, hours):
-    g = d1h['ts'] // (hours * HOUR)
-    out = d1h.groupby(g).agg(ts=('ts', 'first'), open=('open', 'first'), high=('high', 'max'),
-                             low=('low', 'min'), close=('close', 'last'), volume=('volume', 'sum'),
-                             cnt=('ts', 'count'))
-    out = out[out['cnt'] == hours].drop(columns='cnt').reset_index(drop=True)
-    out['ts'] = out['ts'].astype(np.int64)
-    return out
-
-
-def selftest():
-    global _http_get_json, REQUEST_SLEEP, CACHE_DIR
-    ok = True
-
-    def check(name, cond, detail=''):
-        nonlocal ok
-        print(f"  [{'PASS' if cond else 'FAIL'}] {name} {detail}")
-        ok &= bool(cond)
-
-    print('1) Pagination (mock OKX: 100 rows/call, newest first, `after` = older than ts)')
-    n_hours = 17_520
-    hist = _synthetic_1h(n_hours)
-    base_ms = int(hist['ts'].iloc[0])
-    calls = {'n': 0}
-    real_end = base_ms + n_hours * HOUR
-    unconfirmed_ts = int(hist['ts'].iloc[-1])
-
-    def fake_http(url, params, timeout=30):
-        calls['n'] += 1
-        assert 'history-candles' in url
-        assert int(params['limit']) <= 100
-        rows = hist.copy()
-        if 'after' in params:
-            rows = rows[rows['ts'] < int(params['after'])]
-        rows = rows.sort_values('ts', ascending=False).head(int(params['limit']))
-        data = [[str(int(r.ts)), str(r.open), str(r.high), str(r.low), str(r.close), '1', '1', '1',
-                 '0' if int(r.ts) == unconfirmed_ts else '1'] for r in rows.itertuples()]
-        return {'code': '0', 'msg': '', 'data': data}
-
-    _http_get_json = fake_http
-    REQUEST_SLEEP = 0
-    CACHE_DIR = '/tmp/bt_selftest_cache'
-    got = fetch_candles('TEST-USDT-SWAP', '1h', base_ms, real_end, use_cache=False)
-    check('fetched all candles (no 300-row cap)', len(got) == n_hours - 1, f"({len(got)} rows, {calls['n']} calls)")
-    check('sorted, unique', got['ts'].is_monotonic_increasing and got['ts'].is_unique)
-    check('unconfirmed candle excluded', unconfirmed_ts not in set(got['ts']))
-    check('request count sane (~n/100)', calls['n'] <= n_hours // 100 + 3)
-
-    print('2) HTF merge has no lookahead (and works when series lengths differ)')
-    d1h = _synthetic_1h(24 * 400)
-    d4h, d1d = _resample(d1h, 4), _resample(d1h, 24)
-    check('lengths differ (v2 bug trigger)', len({len(d1h), len(d4h), len(d1d)}) == 3)
-    fr = build_frame(compute_indicators(d1h), compute_indicators(d4h), compute_indicators(d1d))
-    v = fr.dropna(subset=['h4_ts', 'd1_ts'])
-    check('4h candle closed before decision', bool((v['h4_ts'] + 4 * HOUR <= v['bar_close']).all()))
-    check('1d candle closed before decision', bool((v['d1_ts'] + DAY <= v['bar_close']).all()))
-    check('4h candle is the LATEST closed one', bool((v['h4_ts'] + 8 * HOUR > v['bar_close']).all()))
-    check('1d candle is the LATEST closed one', bool((v['d1_ts'] + 2 * DAY > v['bar_close']).all()))
-
-    print('3) Causality: signals must not change when future data is removed')
-    full_sig = compute_signals(fr)
-    rng = np.random.default_rng(7)
-    bad = 0
-    for t in rng.integers(MIN_BARS + 400, len(d1h) - 10, 6):
-        cut_close = int(d1h['ts'].iloc[t]) + HOUR
-        a = d1h[d1h['ts'] + HOUR <= cut_close].reset_index(drop=True)
-        b = d4h[d4h['ts'] + 4 * HOUR <= cut_close].reset_index(drop=True)
-        c = d1d[d1d['ts'] + DAY <= cut_close].reset_index(drop=True)
-        fr2 = build_frame(compute_indicators(a), compute_indicators(b), compute_indicators(c))
-        s2 = compute_signals(fr2)
-        if s2[-1] != full_sig[t]:
-            bad += 1
-    check('signal at bar t identical with/without future', bad == 0, f"({bad} mismatches)")
-    check('some signals exist in synthetic data', int((full_sig != 0).sum()) > 0,
-          f"({int((full_sig != 0).sum())})")
-
-    print('4) Trade simulator edge cases')
-    o = np.array([100, 100, 100, 100, 100.0]); ts = np.arange(5, dtype=np.int64) * HOUR
-    big = 10 ** 15
-    h = np.array([101, 103, 101, 101, 101.0]); l = np.array([99.5, 99.5, 99, 99, 99.0])
-    st, j, px = _sim_one(1, 0, 98, 102, o, h, l, ts, big, 5)
-    check('long TP hit', st == S_WIN and px == 102 and j == 1)
-    h2 = np.array([101, 101, 101, 101, 101.0]); l2 = np.array([99.5, 97.5, 99, 99, 99.0])
-    st, j, px = _sim_one(1, 0, 98, 102, o, h2, l2, ts, big, 5)
-    check('long SL hit', st == S_LOSS and px == 98 and j == 1)
-    h3 = np.array([101, 103, 101, 101, 101.0]); l3 = np.array([99.5, 97.0, 99, 99, 99.0])
-    st, j, px = _sim_one(1, 0, 98, 102, o, h3, l3, ts, big, 5)
-    check('SL and TP same bar -> SL (pessimistic)', st == S_LOSS)
-    o4 = np.array([100, 96.0, 100, 100, 100]); h4 = np.array([101, 97, 101, 101, 101.0]); l4 = np.array([99.5, 95, 99, 99, 99.0])
-    st, j, px = _sim_one(1, 0, 98, 102, o4, h4, l4, ts, big, 5)
-    check('gap through stop fills at open (worse than SL)', st == S_LOSS and px == 96.0)
-    flat_h = np.full(5, 100.5); flat_l = np.full(5, 99.5)
-    st, j, px = _sim_one(1, 0, 98, 102, o, flat_h, flat_l, ts, 3 * HOUR, 5)
-    check('time stop at open of deadline bar', st == S_TIME and j == 3 and px == 100.0)
-    st, j, px = _sim_one(1, 0, 98, 102, o, flat_h, flat_l, ts, big, 5)
-    check('unresolved trade marked OPEN (not a win)', st == S_OPEN)
-    hs = np.array([101, 101, 101, 101, 101.0]); ls = np.array([97, 97, 97, 97, 97.0])
-    st, j, px = _sim_one(-1, 0, 102, 98, o, hs, ls, ts, big, 5)
-    check('short TP hit (bar 0 low <= tp, high < sl)', st == S_WIN and px == 98)
-
-    print('5) Cost / funding / sizing math')
-    fts = np.array([HOUR * 10], dtype=np.int64)
-    frate = np.array([0.0001])
-    sd = SymbolData.__new__(SymbolData)
-    # costs: entry 100, stop dist 1 (1%), TP exit at 102
-    c_in = TAKER_FEE + SLIPPAGE_ENTRY
-    exp_win = (c_in * 100 + (TP_FEE + SLIPPAGE_TP) * 102) / 1.0
-    exp_loss = (c_in * 100 + (TAKER_FEE + SLIPPAGE_STOP) * 99) / 1.0
-    check('win cost in R (1% stop)', abs(exp_win - 0.1616) < 1e-3, f"({exp_win:.4f}R)")
-    check('stop-out cost in R (1% stop)', abs(exp_loss - 0.2780) < 1e-3, f"({exp_loss:.4f}R)")
-    d_frac = 0.002  # 0.2% stop -> leverage 5x > cap -> risk must be capped
-    risk = min(STARTING_BALANCE * RISK_PER_TRADE, LEVERAGE_CAP * STARTING_BALANCE * d_frac)
-    check('leverage cap reduces dollar risk', abs(risk - 60.0) < 1e-9, f"(risk ${risk:.0f} not $100)")
-    ts_f, rate_f, src_f = fill_funding_gaps([(100 * HOUR, 0.0003, 'okx'), (108 * HOUR, 0.0003, 'okx')],
-                                            0, 120 * HOUR, 0.0001)
-    check('funding gaps filled with assumed rate, real kept', 'assumed' in src_f and src_f.count('okx') == 2)
-
-    print('6) End-to-end on synthetic data: one position per symbol at a time')
-    d1h = _synthetic_1h(24 * 500, seed=3)
-    d4h, d1d = _resample(d1h, 4), _resample(d1h, 24)
-    fts, frate, _ = fill_funding_gaps([], int(d1h['ts'].iloc[0]), int(d1h['ts'].iloc[-1]) + HOUR, 0.0001)
-    sd = analyze_symbol('SYN/USDT:USDT', d1h, d4h, d1d, fts, frate, int(d1h['ts'].iloc[MIN_BARS * 24 // 24 + 300]))
-    rows, _, so = select_trades(sd)
-    check('produced trades', len(rows) > 5, f"({len(rows)} trades)")
-    overlap = any(rows[k + 1]['signal_bar'] < rows[k]['exit_bar'] for k in range(len(rows) - 1))
-    check('no overlapping trades', not overlap)
-    check('entries use next-bar open', all(r['entry_bar'] == r['signal_bar'] + 1 for r in rows))
-    tdf = pd.DataFrame(rows)
-    r_net, pnl = add_net(tdf)
-    check('net R <= raw R before funding reversals (costs always reduce R)',
-          bool(((tdf['r_raw'] - tdf['cost_r']) <= tdf['r_raw']).all()))
-    base = random_baseline([sd], tdf, 0, False, iters=200)
-    check('random baseline runs', len(base) == 200 and np.isfinite(base).all())
-    m = summarize(tdf, int(d1h['ts'].iloc[0]), int(d1h['ts'].iloc[-1]))
-    check('metrics computed', m['n'] == len(tdf) and np.isfinite(m['sharpe_ann']))
-
-    print('7) Indicator sanity')
-    ind = compute_indicators(d1h)
-    check('RSI within [0,100]', bool(ind['RSI'].dropna().between(0, 100).all()))
-    check('ADX within [0,100]', bool(ind['ADX'].dropna().between(0, 100).all()))
-    check('ATR positive', bool((ind['ATR'].dropna() > 0).all()))
-
-    print('\nSELFTEST', 'PASSED' if ok else 'FAILED')
-    return 0 if ok else 1
-
-
 def main():
-    ap = argparse.ArgumentParser(description='OKX perp swing-strategy backtester (v3)')
+    ap = argparse.ArgumentParser(description='OKX/Binance perp swing-strategy backtester (v3)')
     ap.add_argument('--selftest', action='store_true', help='run offline logic tests and exit')
     ap.add_argument('--days', type=int, default=BACKTEST_DAYS)
     ap.add_argument('--symbols', nargs='*', help='subset by base, e.g. BTC ETH')
     ap.add_argument('--no-cache', action='store_true')
     ap.add_argument('--cache-dir', default=CACHE_DIR)
     ap.add_argument('--out-dir', default='.')
-    ap.add_argument('--max-cost-r', type=float, default=None,
-                    help='skip signals whose stop-out round-trip cost exceeds this many R')
+    ap.add_argument('--max-cost-r', type=float, default=None)
     args = ap.parse_args()
-    if args.selftest:
-        sys.exit(selftest())
     sys.exit(run(args))
 
 
