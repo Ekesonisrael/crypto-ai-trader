@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-15 06:01:10",
+    "timestamp": "2026-10-15 07:01:04",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -11,15 +11,6 @@
             "reason": "no pattern match",
             "affected_assets": [
                 "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin drops below $81,000 as risk-off sentiment weighs on Asian equities",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
             ],
             "url": ""
         },
@@ -38,7 +29,7 @@
             "url": ""
         },
         {
-            "title": "Australia seeks feedback on crypto platform rules ahead of 2027 rollout",
+            "title": "USDC splits global reserves as EBA enforces Nov 12 handover",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -47,25 +38,7 @@
             "url": ""
         },
         {
-            "title": "Qivalis wins Dutch EMI license, but MiCA rules block launch",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Ethereum (ETH) Price: ETH Hits a Make-or-Break Trendline as $880 Million in Longs Get Wiped Out",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin (BTC) Price: Falls Below $81,000 After Hot U.S. CPI Report",
+            "title": "BTCUSD Bearish Breakdown Setup Range Support & Resistance Target",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -74,7 +47,7 @@
             "url": ""
         },
         {
-            "title": "Bitwise CIO says Bitcoin wins in all 3 economic scenarios as macro risks mount",
+            "title": "BTCUSD: Bearish Continuation or a Liquidity Rebound",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -83,7 +56,27 @@
             "url": ""
         },
         {
-            "title": "Vitalik Says Ethereum's ZK Speed Race Is Won. What It Means for ETH",
+            "title": "Buy btc",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Crypto Liquidations Near $1 Billion as Bitcoin, Ethereum and XRP Fall. Here\u2019s What Happened",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC",
+                "ETH",
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Lido V3 & KR1 x P2P.org: London Stock Exchange-Listed Company Launches Dedicated Ethereum Validators on stVaults",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -92,11 +85,20 @@
             "url": ""
         },
         {
-            "title": "Gamdom reports $3M loss as on-chain estimate reaches $4.2M",
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.070267392 | \ud83d\udeb6 0.071267392 | \ud83d\ude80 0.074267392 Gwei",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 749,075 txs today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
             ],
             "url": ""
         }
@@ -104,27 +106,27 @@
     "per_asset_vetoes": {
         "BTC": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         },
         "ETH": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         },
         "SOL": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         },
         "BNB": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         },
         "XRP": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         },
         "DOGE": {
             "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 12:01:31"
+            "expires": "2026-10-15 13:01:19"
         }
     }
 }
