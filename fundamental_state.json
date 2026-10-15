@@ -1,30 +1,26 @@
 {
-    "timestamp": "2026-10-15 07:01:04",
+    "timestamp": "2026-10-15 08:00:59",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Here\u2019s what happened in crypto today",
+            "title": "Bitcoin ETFs shed $261M as XRP funds buck weekly outflow trend",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "BTC",
+                "XRP"
             ],
             "url": ""
         },
         {
-            "title": "South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "score": -0.8,
-            "reason": "SEC + BAN (bearish)",
+            "title": "ETHUSD Bearish Breakdown & Potential Recovery Setup Support Zone",
+            "score": 0.0,
+            "reason": "no pattern match",
             "affected_assets": [
-                "BTC",
-                "ETH",
-                "SOL",
-                "BNB",
-                "XRP",
-                "DOGE"
+                "ETH"
             ],
             "url": ""
         },
@@ -47,7 +43,25 @@
             "url": ""
         },
         {
-            "title": "BTCUSD: Bearish Continuation or a Liquidity Rebound",
+            "title": "Tokenized ETF Market Cap Triples in 2026 as Holder Count Jumps 51x",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.08140533 | \ud83d\udeb6 0.08150533 | \ud83d\ude80 0.09340533 Gwei",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 737,839 txs today",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -56,7 +70,16 @@
             "url": ""
         },
         {
-            "title": "Buy btc",
+            "title": "Ethereum dips below $2,400 as hot inflation fuels selling and long liquidations",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Sept - Oct vs May (BTC), Where is the difference?",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -65,68 +88,19 @@
             "url": ""
         },
         {
-            "title": "Crypto Liquidations Near $1 Billion as Bitcoin, Ethereum and XRP Fall. Here\u2019s What Happened",
+            "title": "Sectora Foundation Announces Final Testing of Four Products and $SECT Token Availability on Uniswap",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "BTC",
                 "ETH",
-                "XRP"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Lido V3 & KR1 x P2P.org: London Stock Exchange-Listed Company Launches Dedicated Ethereum Validators on stVaults",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.070267392 | \ud83d\udeb6 0.071267392 | \ud83d\ude80 0.074267392 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 749,075 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
+                "SOL",
+                "BNB",
+                "XRP",
+                "DOGE"
             ],
             "url": ""
         }
     ],
-    "per_asset_vetoes": {
-        "BTC": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        },
-        "ETH": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        },
-        "SOL": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        },
-        "BNB": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        },
-        "XRP": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        },
-        "DOGE": {
-            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
-            "expires": "2026-10-15 13:01:19"
-        }
-    }
+    "per_asset_vetoes": {}
 }
