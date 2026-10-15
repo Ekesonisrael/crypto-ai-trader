@@ -1,12 +1,84 @@
 {
-    "timestamp": "2026-10-15 01:01:05",
+    "timestamp": "2026-10-15 02:00:39",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
-            "title": "Solana sets October 21 for massive Alpenglow upgrade that could make transactions 99% faster to finalize",
+            "title": "VanEck seeks to withdraw application for Lido staked Ether ETF",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Firelight forces XRP-linked tokens lockup as withdrawal delay queue grows",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Why Standard Chartered Is Keeping Crypto Inside the Bank",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.064941005 | \ud83d\udeb6 0.064947031 | \ud83d\ude80 0.065218658 Gwei",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 763,275 txs today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "A whale withdrew and replenished 3,288 ETH in two transactions, with an average price of $2,450.",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "S&P 500 Enters Its Strongest Seasonal Window",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Ethereum",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Samsung Wallet adds USDC transfers on Solana for US Galaxy users",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -22,84 +94,7 @@
                 "GLOBAL"
             ],
             "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.06605663 | \ud83d\udeb6 0.066069559 | \ud83d\ude80 0.072681607 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 783,524 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "$NIL \u2014 Bearish Harmonic Setup at a Key Reversal Zone",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf BTC Fees: \u26a1 1 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "US Inflation Rises to 3.7% as Gasoline Surges, Putting an October Fed Hike in Play",
-            "score": -0.6,
-            "reason": "FED + HIKE (bearish)",
-            "affected_assets": [
-                "SOL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Sebi plans to ease many SME IPO rules, lower application amount",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Stocks in news: Reliance Industries, Jio Financial, Tata Tech, HDB Financial and Wipro",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Power prices top $1,000 on PJM as DoE issues emergency order to prevent blackouts",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
         }
     ],
-    "per_asset_vetoes": {
-        "SOL": {
-            "reason": "FED + HIKE (bearish): US Inflation Rises to 3.7% as Gasoline Surges, Putting an October Fed Hike in Pl",
-            "expires": "2026-10-15 07:01:29"
-        }
-    }
+    "per_asset_vetoes": {}
 }
