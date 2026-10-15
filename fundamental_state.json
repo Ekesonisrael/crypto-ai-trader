@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-14 23:00:54",
+    "timestamp": "2026-10-15 00:00:29",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -15,7 +15,16 @@
             "url": ""
         },
         {
-            "title": "Surging dollar forces Bitcoin sell-off as rate hike odds double",
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.067940119 | \ud83d\udeb6 0.068040119 | \ud83d\ude80 0.068940119 Gwei",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 803,842 txs today",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -24,16 +33,30 @@
             "url": ""
         },
         {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.072878286 | \ud83d\udeb6 0.07289052 | \ud83d\ude80 0.075545364 Gwei",
-            "score": 0.0,
-            "reason": "no pattern match",
+            "title": "SEC approves Cboe prediction market options tied to Coinbase, Nvidia, Tesla metrics",
+            "score": 0.8,
+            "reason": "SEC + APPROVE (bullish)",
             "affected_assets": [
-                "ETH"
+                "BTC",
+                "ETH",
+                "SOL",
+                "BNB",
+                "XRP",
+                "DOGE"
             ],
             "url": ""
         },
         {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 792,612 txs today",
+            "title": "Is Berkshire betting on its \"younger self\"? But this is actually a \"technology company\"!",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "\u20bf BTC Fees: \u26a1 3 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -42,20 +65,20 @@
             "url": ""
         },
         {
-            "title": "VanEck withdraws SEC registration for its Lido Staked Ethereum ETF",
+            "title": "Surging gasoline prices accounted for more than half of last month's jump in U.S. inflation",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "ETH"
+                "SOL"
             ],
             "url": ""
         },
         {
-            "title": "\u201cNot a sell-off\u201d: Ethena CEO says investor\u2019s on-chain moves were a security precaution",
+            "title": "Bitcoin is primed for a super cycle.",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "ETH"
+                "BTC"
             ],
             "url": ""
         },
@@ -69,25 +92,7 @@
             "url": ""
         },
         {
-            "title": "\u20bf BTC Fees: \u26a1 1 | \u23f1\ufe0f 1 | \ud83d\udd50 1 sat/vB",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Coinbase reveals how it once guarded cold storage keys with Faraday cages",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "OCC says big banks debanked crypto as it charters crypto firms",
+            "title": "Brooklyn DA and FBI Crush Massive International Crypto Scam",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
