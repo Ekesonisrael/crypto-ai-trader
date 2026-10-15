@@ -1,5 +1,5 @@
 {
-    "timestamp": "2026-10-15 11:00:44",
+    "timestamp": "2026-10-15 12:00:36",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
@@ -11,6 +11,24 @@
             "reason": "no pattern match",
             "affected_assets": [
                 "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "EBA designates Circle\u2019s USDC as the EU\u2019s first \u2018significant\u2019 e-money token",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin Tests $81,000 as Rate Hike Fears Linger After Hot Inflation Data",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
             ],
             "url": ""
         },
@@ -33,7 +51,16 @@
             "url": ""
         },
         {
-            "title": "Thailand crypto ETFs may see slow start despite new rules: CoinShares",
+            "title": "bitcoin at the edge, will bulls defend 80k and reach 90k",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "White House crypto council chief Patrick Witt steps down",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -56,16 +83,7 @@
             "url": ""
         },
         {
-            "title": "White House crypto council chief Patrick Witt steps down",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Bitcoin dips to $80.1K as KOSPI closes at its lowest since April",
+            "title": "Bitcoin\u2019s AI-driven rally faces a hidden danger if the machines get richer but workers don\u2019t",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -74,29 +92,11 @@
             "url": ""
         },
         {
-            "title": "Bitget, Liquid exploits push Q3 crypto hacks toward $1.2B",
+            "title": "BitFuFu takes Bitcoin mining onchain with BTC-denominated HASH token",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Why Isn\u2019t XRP Rising? 13 Weeks of ETF Inflows Haven\u2019t Moved the Price",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "XRP"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Lido brings one-transaction ETH staking to Arbitrum, Base, Linea and Optimism",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
+                "BTC"
             ],
             "url": ""
         }
