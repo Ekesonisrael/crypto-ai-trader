@@ -1,10 +1,19 @@
 {
-    "timestamp": "2026-10-15 05:01:01",
+    "timestamp": "2026-10-15 06:01:10",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
+        {
+            "title": "Here\u2019s what happened in crypto today",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
         {
             "title": "Bitcoin drops below $81,000 as risk-off sentiment weighs on Asian equities",
             "score": 0.0,
@@ -15,25 +24,21 @@
             "url": ""
         },
         {
-            "title": "Bitcoin miners plunge up to 13% in Wall Street\u2019s worst selloff since July",
-            "score": 0.0,
-            "reason": "no pattern match",
+            "title": "South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "score": -0.8,
+            "reason": "SEC + BAN (bearish)",
             "affected_assets": [
-                "BTC"
+                "BTC",
+                "ETH",
+                "SOL",
+                "BNB",
+                "XRP",
+                "DOGE"
             ],
             "url": ""
         },
         {
-            "title": "UPBIT \u4e0a\u7ebf Puffer (PUFFER) \u5e76\u652f\u6301 KRW \u4ea4\u6613",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u64ad\u5ba2\u7b14\u8bb0\uff5c\u5bf9\u8bdd\u5b59\u5b87\u6668\uff1a\u6781\u81f4\u7684\u5b64\u72ec\uff0c\u4e5f\u662f\u4e00\u79cd\u81ea\u7531",
+            "title": "Australia seeks feedback on crypto platform rules ahead of 2027 rollout",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -42,16 +47,16 @@
             "url": ""
         },
         {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 766,546 txs today",
+            "title": "Qivalis wins Dutch EMI license, but MiCA rules block launch",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "BTC"
+                "GLOBAL"
             ],
             "url": ""
         },
         {
-            "title": "ETHUSDT: Bearish Breakdown Toward 2,220 Liquidity",
+            "title": "Ethereum (ETH) Price: ETH Hits a Make-or-Break Trendline as $880 Million in Longs Get Wiped Out",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
@@ -60,41 +65,66 @@
             "url": ""
         },
         {
-            "title": "Standard Chartered delays $2T stablecoin forecast to 2030 as supply stalls",
+            "title": "Bitcoin (BTC) Price: Falls Below $81,000 After Hot U.S. CPI Report",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "BTC"
             ],
             "url": ""
         },
         {
-            "title": "Peter Schiff Says Most Stocks Are in Bear Market as AI Leaders Carry the Index",
+            "title": "Bitwise CIO says Bitcoin wins in all 3 economic scenarios as macro risks mount",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
-                "GLOBAL"
+                "BTC"
             ],
             "url": ""
         },
         {
-            "title": "\u67d0\u5927\u7a7a\u5934\u4ea4\u6613\u5458\u7d2f\u8ba1\u83b7\u5229 640 \u4e07\u7f8e\u5143\uff0c\u4ecd\u6301\u591a\u6807\u7684\u7a7a\u5355",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Tether paid millions to Bo Hines\u2019 firm while he worked at the White House",
+            "title": "Vitalik Says Ethereum's ZK Speed Race Is Won. What It Means for ETH",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "ETH"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Gamdom reports $3M loss as on-chain estimate reaches $4.2M",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
             ],
             "url": ""
         }
     ],
-    "per_asset_vetoes": {}
+    "per_asset_vetoes": {
+        "BTC": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        },
+        "ETH": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        },
+        "SOL": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        },
+        "BNB": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        },
+        "XRP": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        },
+        "DOGE": {
+            "reason": "SEC + BAN (bearish): South Korea plans cybersecurity overhaul after attacks hit banks, crypto firms",
+            "expires": "2026-10-15 12:01:31"
+        }
+    }
 }
