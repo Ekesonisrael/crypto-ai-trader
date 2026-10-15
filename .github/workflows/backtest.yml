@@ -46,7 +46,7 @@ jobs:
 
       - name: Full run
         if: inputs.command == 'full'
-        run: python backtest_v3.py --days 730 --no-cache
+        run: python backtest_v3.py --days 1460 --no-cache
 
       - name: Commit results
         if: inputs.command != 'selftest'
