@@ -1,16 +1,79 @@
 {
-    "timestamp": "2026-10-15 08:00:59",
+    "timestamp": "2026-10-15 09:00:41",
     "api_status": "DEGRADED",
     "sentiment_score": 0.0,
     "sentiment_label": "Neutral",
     "x_sentiment": 0.0,
     "headlines_scored": [
         {
+            "title": "9 mega banks block crypto accounts, but new OCC rules bite back",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Bitcoin Sinks Toward $80,000 After Hot CPI. Will Whales Keep What They Added?",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "EVEDEX Releases $EVE Tokenomics: 100M Fixed Supply, Non-Transferable Staking and a Retroactive Airdrop for Early Users",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "GLOBAL"
+            ],
+            "url": ""
+        },
+        {
             "title": "Bitcoin ETFs shed $261M as XRP funds buck weekly outflow trend",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "BTC",
+                "XRP"
+            ],
+            "url": ""
+        },
+        {
+            "title": "BTCUSD Bearish Momentum Builds as Bitcoin Tests Critical Support",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "Satoshi Frame | BTC analysis D12",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "BTCUS Bearish Market Structure, Order Block & Liquidity Targets",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
+                "BTC"
+            ],
+            "url": ""
+        },
+        {
+            "title": "XRP price prediction 2026-2032: Will XRP reach $5?",
+            "score": 0.0,
+            "reason": "no pattern match",
+            "affected_assets": [
                 "XRP"
             ],
             "url": ""
@@ -25,79 +88,11 @@
             "url": ""
         },
         {
-            "title": "USDC splits global reserves as EBA enforces Nov 12 handover",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "BTCUSD Bearish Breakdown Setup Range Support & Resistance Target",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Tokenized ETF Market Cap Triples in 2026 as Holder Count Jumps 51x",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "GLOBAL"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u26fd ETH Gas: \ud83d\udc22 0.08140533 | \ud83d\udeb6 0.08150533 | \ud83d\ude80 0.09340533 Gwei",
+            "title": "\u26fd ETH Gas: \ud83d\udc22 0.068841472 | \ud83d\udeb6 0.068941472 | \ud83d\ude80 0.075835619 Gwei",
             "score": 0.0,
             "reason": "no pattern match",
             "affected_assets": [
                 "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "\u20bf Bitcoin Network: 0.0 EH/s hashrate, 737,839 txs today",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Ethereum dips below $2,400 as hot inflation fuels selling and long liquidations",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "ETH"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Sept - Oct vs May (BTC), Where is the difference?",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC"
-            ],
-            "url": ""
-        },
-        {
-            "title": "Sectora Foundation Announces Final Testing of Four Products and $SECT Token Availability on Uniswap",
-            "score": 0.0,
-            "reason": "no pattern match",
-            "affected_assets": [
-                "BTC",
-                "ETH",
-                "SOL",
-                "BNB",
-                "XRP",
-                "DOGE"
             ],
             "url": ""
         }
